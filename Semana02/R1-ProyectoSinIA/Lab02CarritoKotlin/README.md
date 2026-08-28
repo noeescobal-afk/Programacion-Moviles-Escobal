@@ -1,104 +1,49 @@
-\# Laboratorio 02 - Carrito de Compras en Kotlin
+# Laboratorio 02 - Carrito de Compras en Kotlin
 
+## Datos del estudiante
 
+- **Estudiante:** Noe Oswaldo Escobal
+- **Curso:** Programación en Móviles
+- **Institución:** TECSUP
+- **Laboratorio:** 02
+- **Proyecto:** R1 - Proyecto sin IA
 
-\## Datos del estudiante
+## Descripción
 
+Este proyecto implementa la lógica de un carrito de compras utilizando Kotlin.
 
+El programa permite registrar productos con su nombre, precio y cantidad, calcular el subtotal de la compra, el IGV del 18%, el total a pagar, identificar el producto más caro y aplicar descuentos dependiendo del monto total de la compra.
 
-\- \*\*Estudiante:\*\* Noe Oswaldo Escobal
+También se utiliza formato de salida para mostrar los productos y montos de manera ordenada en consola.
 
-\- \*\*Curso:\*\* Programación en Móviles
+## Conceptos utilizados
 
-\- \*\*Institución:\*\* TECSUP
+Durante el laboratorio se utilizaron los siguientes conceptos de Kotlin:
 
-\- \*\*Laboratorio:\*\* 02
+- `val` y `var`
+- `String`
+- `Int`
+- `Double`
+- `data class`
+- `MutableList`
+- `mutableListOf()`
+- `fun`
+- `for`
+- `if`
+- `when`
+- `return`
+- Plantillas de String
+- `String.format()`
+- `maxByOrNull()`
+- `find()`
 
-\- \*\*Proyecto:\*\* R1 - Proyecto sin IA
+## Modelo de datos
 
-
-
-\## Descripción
-
-
-
-Este proyecto implementa un carrito de compras en Kotlin utilizando variables, funciones, colecciones y estructuras de decisión.
-
-
-
-El programa permite registrar productos, calcular el subtotal, el IGV del 18%, el total de la compra, identificar el producto más caro y aplicar un descuento dependiendo del monto total.
-
-
-
-\## Conceptos utilizados
-
-
-
-\- `val` y `var`
-
-\- `String`, `Int` y `Double`
-
-\- `data class`
-
-\- `MutableList`
-
-\- `fun`
-
-\- `for`
-
-\- `when`
-
-\- `return`
-
-\- `String.format`
-
-\- `maxByOrNull`
-
-
-
-\## Funciones implementadas
-
-
-
-\- `calcularSubtotal()`: calcula el subtotal de todos los productos.
-
-\- `calcularIGV()`: calcula el 18% del subtotal.
-
-\- `calcularTotal()`: obtiene el total incluyendo IGV.
-
-\- `mostrarDetalle()`: muestra el detalle del carrito con columnas alineadas.
-
-\- `calcularDescuento()`: aplica un descuento según el monto total.
-
-\- `buscarProducto()`: permite buscar un producto por nombre.
-
-
-
-\## Diferencia entre val y var
-
-
-
-`val` se utiliza para valores que no deben ser reasignados después de su creación.
-
-
-
-`var` permite modificar su valor posteriormente.
-
-
-
-En la clase `Producto`:
-
-
+Se utilizó una `data class` para representar cada producto:
 
 ```kotlin
-
 data class Producto(
-
-&#x20;   val nombre: String,
-
-&#x20;   val precio: Double,
-
-&#x20;   var cantidad: Int
-
+    val nombre: String,
+    val precio: Double,
+    var cantidad: Int
 )
-
