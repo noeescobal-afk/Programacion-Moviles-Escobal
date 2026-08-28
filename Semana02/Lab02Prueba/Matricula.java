@@ -45,7 +45,7 @@ public class Matricula {
         } else if (totalCreditos <= 18) {
             cargaAcademica = "Carga Completa";
         } else {
-            cargaAcademica = "Renuncia Autorizada";
+            cargaAcademica = "Permiso Autorizado";
         }
 
         int numeroCuotas;
@@ -55,6 +55,20 @@ public class Matricula {
             numeroCuotas = 2;
         }
         double montoCuota = totalPagar / numeroCuotas;
+        // ================== COMMIT 3: RESULTADO FINAL ==================
+        System.out.println();
+        System.out.println("Estudiante: " + nombreEstudiante);
+        System.out.println();
+        System.out.printf("%-25s %-10s %-10s%n", "Curso", "Creditos", "Costo");
+        for (int i = 0; i < cantidadCursos; i++) {
+            System.out.printf("%-25s %-10d %-10.0f%n", nombreCursos[i], creditosCursos[i], costoCursos[i]);
+        }
+        System.out.println();
+        System.out.println("Cursos Matriculados: " + cantidadCursos);
+        System.out.println("Total Creditos: " + totalCreditos);
+        System.out.println("Total a pagar: " + (int) totalPagar);
+        System.out.println("Carga academica: " + cargaAcademica);
+        System.out.println("Forma de pago: " + numeroCuotas + " cuotas de " + (int) montoCuota + " Soles");
         sc.close();
     }
 }
