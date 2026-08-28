@@ -15,4 +15,9 @@ class Carrito {
     fun obtenerProductos(): List<Producto> {
         return productos.toList()
     }
+    fun calcularTotal(): Double {
+        return productos.sumOf {
+            it.calcularPrecioFinal()
+        }
+    }
 }
