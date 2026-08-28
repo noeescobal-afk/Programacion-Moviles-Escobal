@@ -28,7 +28,33 @@ public class Matricula {
             creditosCursos[i] = sc.nextInt();
             sc.nextLine();
         }
+        // ================== COMMIT 2: CALCULOS ==================
+        double[] costoCursos = new double[cantidadCursos];
+        int totalCreditos = 0;
+        double totalPagar = 0;
 
+        for (int i = 0; i < cantidadCursos; i++) {
+            costoCursos[i] = creditosCursos[i] * valorCredito;
+            totalCreditos += creditosCursos[i];
+            totalPagar += costoCursos[i];
+        }
+
+        String cargaAcademica;
+        if (totalCreditos <= 12) {
+            cargaAcademica = "Malla Regular";
+        } else if (totalCreditos <= 18) {
+            cargaAcademica = "Carga Completa";
+        } else {
+            cargaAcademica = "Renuncia Autorizada";
+        }
+
+        int numeroCuotas;
+        if (totalPagar > 2500) {
+            numeroCuotas = 3;
+        } else {
+            numeroCuotas = 2;
+        }
+        double montoCuota = totalPagar / numeroCuotas;
         sc.close();
     }
 }
