@@ -57,6 +57,15 @@ fun calcularDescuento(total: Double): Double {
     }
 }
 
+fun eliminarProducto(
+    productos: MutableList<Producto>,
+    nombre: String
+): Boolean {
+    return productos.removeIf {
+        it.nombre.equals(nombre, ignoreCase = true)
+    }
+}
+
 fun buscarProducto(
     productos: List<Producto>,
     nombre: String
@@ -193,6 +202,23 @@ fun main() {
             totalConDescuento
         )
     )
+
+    println()
+    println("---------- RETO ADICIONAL ----------")
+
+    val eliminado = eliminarProducto(carrito, "USB Kingston 64GB")
+
+    if (eliminado) {
+        println("Producto eliminado: USB Kingston 64GB")
+
+        val nuevoSubtotal = calcularSubtotal(carrito)
+        val nuevoIGV = calcularIGV(nuevoSubtotal)
+        val nuevoTotal = calcularTotal(nuevoSubtotal, nuevoIGV)
+
+        println(String.format("Nuevo subtotal : S/ %.2f", nuevoSubtotal))
+        println(String.format("Nuevo IGV      : S/ %.2f", nuevoIGV))
+        println(String.format("Nuevo total    : S/ %.2f", nuevoTotal))
+    }
 
     println()
     println(
