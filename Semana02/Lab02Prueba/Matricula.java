@@ -59,10 +59,15 @@ public class Matricula {
         System.out.println();
         System.out.println("Estudiante: " + nombreEstudiante);
         System.out.println();
-        System.out.printf("%-25s %-10s %-10s%n", "Curso", "Creditos", "Costo");
+
+        System.out.println("+---------------------------+------------+------------+");
+        System.out.printf("| %-27s | %-10s | %-10s |%n", "Curso", "Creditos", "Costo");
+        System.out.println("+---------------------------+------------+------------+");
         for (int i = 0; i < cantidadCursos; i++) {
-            System.out.printf("%-25s %-10d %-10.0f%n", nombreCursos[i], creditosCursos[i], costoCursos[i]);
+            System.out.printf("| %-27s | %-10d | %-10.0f |%n", nombreCursos[i], creditosCursos[i], costoCursos[i]);
         }
+        System.out.println("+---------------------------+------------+------------+");
+
         System.out.println();
         System.out.println("Cursos Matriculados: " + cantidadCursos);
         System.out.println("Total Creditos: " + totalCreditos);
