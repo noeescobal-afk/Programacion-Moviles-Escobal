@@ -12,18 +12,12 @@
 
 Este proyecto implementa la lógica de un carrito de compras utilizando Kotlin.
 
-El programa permite registrar productos con su nombre, precio y cantidad, calcular el subtotal de la compra, el IGV del 18%, el total a pagar, identificar el producto más caro y aplicar descuentos dependiendo del monto total de la compra.
-
-También se utiliza formato de salida para mostrar los productos y montos de manera ordenada en consola.
+El programa permite registrar productos con su nombre, precio y cantidad, calcular el subtotal, el IGV del 18%, el total de la compra, identificar el producto más caro y aplicar un descuento según el monto total.
 
 ## Conceptos utilizados
 
-Durante el laboratorio se utilizaron los siguientes conceptos de Kotlin:
-
 - `val` y `var`
-- `String`
-- `Int`
-- `Double`
+- `String`, `Int` y `Double`
 - `data class`
 - `MutableList`
 - `mutableListOf()`
@@ -32,14 +26,13 @@ Durante el laboratorio se utilizaron los siguientes conceptos de Kotlin:
 - `if`
 - `when`
 - `return`
-- Plantillas de String
 - `String.format()`
 - `maxByOrNull()`
 - `find()`
 
 ## Modelo de datos
 
-Se utilizó una `data class` para representar cada producto:
+El producto se representa mediante una `data class`:
 
 ```kotlin
 data class Producto(
