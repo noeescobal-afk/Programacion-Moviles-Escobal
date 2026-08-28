@@ -1,42 +1,36 @@
-# Laboratorio 02 - Carrito de Compras en Kotlin
+```
 
-## Datos del estudiante
+## Diferencia entre val y var
 
-- **Estudiante:** Noe Oswaldo Escobal
-- **Curso:** Programación en Móviles
-- **Institución:** TECSUP
-- **Laboratorio:** 02
-- **Proyecto:** R1 - Proyecto sin IA
+En Kotlin, `val` se utiliza cuando una referencia no debe ser reasignada después de inicializarse.
 
-## Descripción
+`var` permite que su valor pueda cambiar posteriormente.
 
-Este proyecto implementa la lógica de un carrito de compras utilizando Kotlin.
+En la clase `Producto`, `nombre` y `precio` utilizan `val` porque no deberían cambiar después de crear el producto.
 
-El programa permite registrar productos con su nombre, precio y cantidad, calcular el subtotal, el IGV del 18%, el total de la compra, identificar el producto más caro y aplicar un descuento según el monto total.
+La propiedad `cantidad` utiliza `var` porque la cantidad de unidades sí puede aumentar o disminuir.
 
-## Conceptos utilizados
+Si intentamos modificar el precio después de crear un producto, Kotlin mostrará un error porque `precio` fue declarado como `val`.
 
-- `val` y `var`
-- `String`, `Int` y `Double`
-- `data class`
-- `MutableList`
-- `mutableListOf()`
-- `fun`
-- `for`
-- `if`
-- `when`
-- `return`
-- `String.format()`
-- `maxByOrNull()`
-- `find()`
+## Funciones implementadas
 
-## Modelo de datos
+- `calcularSubtotal()`: calcula la suma de precio por cantidad de todos los productos.
+- `calcularIGV()`: calcula el 18% del subtotal.
+- `calcularTotal()`: suma el subtotal y el IGV.
+- `mostrarDetalle()`: muestra el carrito con columnas alineadas.
+- `calcularDescuento()`: aplica descuentos utilizando `when`.
+- `buscarProducto()`: busca un producto mediante su nombre.
 
-El producto se representa mediante una `data class`:
+## Resultado final
 
-```kotlin
-data class Producto(
-    val nombre: String,
-    val precio: Double,
-    var cantidad: Int
-)
+- **Cantidad de productos:** 4
+- **Subtotal:** S/ 2786.00
+- **IGV (18%):** S/ 501.48
+- **Total a pagar:** S/ 3287.48
+- **Producto más caro:** Laptop HP
+- **Descuento aplicado:** 5%
+- **Total con descuento:** S/ 3123.11
+
+## Evidencia de ejecución
+
+![Resultado final del carrito](evidencias/resultadofinal.png)
