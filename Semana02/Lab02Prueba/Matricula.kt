@@ -20,5 +20,37 @@ fun main() {
 
         print("Creditos del curso $i: ")
         val creditosCurso = readLine()!!.toInt()
+
+        val costoCurso = creditosCurso * valorCredito
+
+        totalCreditos += creditosCurso
+        totalPagar += costoCurso
+
+        tablaCursos += String.format(
+            "| %-27s | %-10d | %-10.0f |\n",
+            nombreCurso,
+            creditosCurso,
+            costoCurso
+        )
     }
+
+    val cargaAcademica: String
+
+    if (totalCreditos <= 12) {
+        cargaAcademica = "Malla Regular"
+    } else if (totalCreditos <= 18) {
+        cargaAcademica = "Carga Completa"
+    } else {
+        cargaAcademica = "Permiso Autorizado"
+    }
+
+    val numeroCuotas: Int
+
+    if (totalPagar > 2500) {
+        numeroCuotas = 3
+    } else {
+        numeroCuotas = 2
+    }
+
+    val montoCuota = totalPagar / numeroCuotas
 }
