@@ -53,4 +53,32 @@ fun main() {
     }
 
     val montoCuota = totalPagar / numeroCuotas
+
+    println()
+    println("Estudiante: $nombreEstudiante")
+    println()
+
+    println("+-----------------------------+------------+------------+")
+    println(
+        String.format(
+            "| %-27s | %-10s | %-10s |",
+            "Curso",
+            "Creditos",
+            "Costo"
+        )
+    )
+    println("+-----------------------------+------------+------------+")
+
+    print(tablaCursos)
+
+    println("+-----------------------------+------------+------------+")
+
+    println()
+    println("Cursos Matriculados: $cantidadCursos")
+    println("Total Creditos: $totalCreditos")
+    println("Total a pagar: ${totalPagar.toInt()}")
+    println("Carga academica: $cargaAcademica")
+    println(
+        "Forma de pago: $numeroCuotas cuotas de ${montoCuota.toInt()} Soles"
+    )
 }
