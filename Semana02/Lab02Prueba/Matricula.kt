@@ -57,15 +57,6 @@ fun main() {
         cargaAcademica = "Permiso Autorizado"
     }
 
-    val numeroCuotas: Int
-
-    if (totalPagar > 2500) {
-        numeroCuotas = 3
-    } else {
-        numeroCuotas = 2
-    }
-
-    val montoCuota = totalPagar / numeroCuotas
 
     var porcentajeTurno = 0.0
 
@@ -84,6 +75,20 @@ fun main() {
     val matricula = precioMatricula
 
     val totalConMatricula = totalConTurno + matricula
+
+    val igv = totalConMatricula * 0.18
+
+    val totalFinal = totalConMatricula + igv
+
+    val numeroCuotas: Int
+
+    if (totalFinal > 2500) {
+        numeroCuotas = 3
+    } else {
+        numeroCuotas = 2
+    }
+
+    val montoCuota = totalFinal / numeroCuotas
 
     println()
     println("Estudiante: $nombreEstudiante")
@@ -112,7 +117,8 @@ fun main() {
     println("Recargo por turno: ${montoTurno.toInt()}")
     println("Categoria: $categoria")
     println("Matricula: ${matricula.toInt()}")
-    println("Total a pagar: ${totalConMatricula.toInt()}")
+    println("IGV 18%: ${igv.toInt()}")
+    println("Total a pagar: ${totalFinal.toInt()}")
     println("Carga academica: $cargaAcademica")
     println(
         "Forma de pago: $numeroCuotas cuotas de ${montoCuota.toInt()} Soles"
