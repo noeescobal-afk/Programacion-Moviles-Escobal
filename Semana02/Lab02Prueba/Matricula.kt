@@ -6,8 +6,18 @@ fun main() {
     print("Ingrese su turno (M=Manana, T=Tarde, N=Noche): ")
     val turno = readLine()!!.uppercase()
 
+    print("Ingrese su categoria (O=Ordinario, B=Becado): ")
+    val categoria = readLine()!!.uppercase()
+
     print("Ingrese el valor de cada credito (S/): ")
     val valorCredito = readLine()!!.toDouble()
+
+    var precioMatricula = 0.0
+
+    if (categoria == "O") {
+        print("Ingrese el precio de la matricula (S/): ")
+        precioMatricula = readLine()!!.toDouble()
+    }
 
     print("Ingrese la cantidad de cursos a matricular: ")
     val cantidadCursos = readLine()!!.toInt()
@@ -71,6 +81,10 @@ fun main() {
 
     val totalConTurno = totalPagar + montoTurno
 
+    val matricula = precioMatricula
+
+    val totalConMatricula = totalConTurno + matricula
+
     println()
     println("Estudiante: $nombreEstudiante")
     println()
@@ -96,7 +110,9 @@ fun main() {
     println("Total cursos: ${totalPagar.toInt()}")
     println("Turno: $turno")
     println("Recargo por turno: ${montoTurno.toInt()}")
-    println("Total a pagar: ${totalConTurno.toInt()}")
+    println("Categoria: $categoria")
+    println("Matricula: ${matricula.toInt()}")
+    println("Total a pagar: ${totalConMatricula.toInt()}")
     println("Carga academica: $cargaAcademica")
     println(
         "Forma de pago: $numeroCuotas cuotas de ${montoCuota.toInt()} Soles"
