@@ -3,6 +3,9 @@ fun main() {
     print("Ingrese su nombre completo: ")
     val nombreEstudiante = readLine() ?: ""
 
+    print("Ingrese su turno (M=Manana, T=Tarde, N=Noche): ")
+    val turno = readLine()!!.uppercase()
+
     print("Ingrese el valor de cada credito (S/): ")
     val valorCredito = readLine()!!.toDouble()
 
@@ -54,6 +57,20 @@ fun main() {
 
     val montoCuota = totalPagar / numeroCuotas
 
+    var porcentajeTurno = 0.0
+
+    if (turno == "M") {
+        porcentajeTurno = 0.10
+    } else if (turno == "T") {
+        porcentajeTurno = 0.15
+    } else if (turno == "N") {
+        porcentajeTurno = 0.20
+    }
+
+    val montoTurno = totalPagar * porcentajeTurno
+
+    val totalConTurno = totalPagar + montoTurno
+
     println()
     println("Estudiante: $nombreEstudiante")
     println()
@@ -76,7 +93,10 @@ fun main() {
     println()
     println("Cursos Matriculados: $cantidadCursos")
     println("Total Creditos: $totalCreditos")
-    println("Total a pagar: ${totalPagar.toInt()}")
+    println("Total cursos: ${totalPagar.toInt()}")
+    println("Turno: $turno")
+    println("Recargo por turno: ${montoTurno.toInt()}")
+    println("Total a pagar: ${totalConTurno.toInt()}")
     println("Carga academica: $cargaAcademica")
     println(
         "Forma de pago: $numeroCuotas cuotas de ${montoCuota.toInt()} Soles"
