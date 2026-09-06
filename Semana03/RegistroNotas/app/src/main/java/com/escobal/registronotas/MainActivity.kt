@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 
 
 class MainActivity : ComponentActivity() {
@@ -59,6 +60,16 @@ fun RegistroNotasScreen() {
 
     var promedioPonderado by remember {
         mutableStateOf(0.0)
+    }
+
+
+    var promedioFinal by remember {
+        mutableStateOf(0)
+    }
+
+
+    var observacion by remember {
+        mutableStateOf("")
     }
 
 
@@ -205,8 +216,6 @@ fun RegistroNotasScreen() {
 
 
 
-        // SWITCH
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -236,8 +245,6 @@ fun RegistroNotasScreen() {
 
 
 
-        // CHECKBOX
-
         Row {
 
 
@@ -264,8 +271,6 @@ fun RegistroNotasScreen() {
 
 
 
-        // BOTON CALCULAR
-
         Button(
 
             enabled = confirmado,
@@ -280,9 +285,33 @@ fun RegistroNotasScreen() {
                             notaBaseDatos * 0.25
 
 
-                mensaje =
-                    "Promedio calculado correctamente"
 
+                promedioFinal =
+                    if (redondear) {
+                        promedioPonderado.roundToInt()
+                    } else {
+                        promedioPonderado.toInt()
+                    }
+
+
+
+                observacion =
+                    when (promedioFinal) {
+
+                        in 17..20 -> "EXCELENTE"
+
+                        in 13..16 -> "APROBADO"
+
+                        in 10..12 -> "EN RECUPERACIÓN"
+
+                        else -> "DESAPROBADO"
+
+                    }
+
+
+
+                mensaje =
+                    "✓ Promedio calculado correctamente"
 
             },
 
@@ -306,7 +335,9 @@ fun RegistroNotasScreen() {
 
 
         Card(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
         ) {
 
 
@@ -333,6 +364,16 @@ fun RegistroNotasScreen() {
 
                 Text(
                     text = "Promedio ponderado: %.2f".format(promedioPonderado)
+                )
+
+
+                Text(
+                    text = "Promedio final: $promedioFinal"
+                )
+
+
+                Text(
+                    text = "Observación: $observacion"
                 )
 
 
