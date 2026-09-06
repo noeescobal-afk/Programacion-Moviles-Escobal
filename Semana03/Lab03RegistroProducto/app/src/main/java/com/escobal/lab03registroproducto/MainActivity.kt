@@ -5,14 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.material3.OutlinedTextField
 
 
 class MainActivity : ComponentActivity() {
@@ -28,7 +23,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun RegistroProductoScreen(){
+fun RegistroProductoScreen() {
 
     var nombre by remember {
         mutableStateOf("")
@@ -42,12 +37,17 @@ fun RegistroProductoScreen(){
         mutableStateOf("")
     }
 
+    var importe by remember {
+        mutableStateOf(0.0)
+    }
+
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
-    ){
+    ) {
+
 
         Text(
             text = "Nuevo producto",
@@ -114,6 +114,79 @@ fun RegistroProductoScreen(){
             },
             modifier = Modifier.fillMaxWidth()
         )
+
+
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
+
+
+        Button(
+            onClick = {
+
+                importe =
+                    (precio.toDoubleOrNull() ?: 0.0) *
+                            (cantidad.toIntOrNull() ?: 0)
+
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            Text(
+                text = "AGREGAR PRODUCTO"
+            )
+
+        }
+
+
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
+
+
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+
+                Text(
+                    text = "Resumen del producto",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+
+                Spacer(
+                    modifier = Modifier.height(10.dp)
+                )
+
+
+                Text(
+                    text = "Nombre: $nombre"
+                )
+
+
+                Text(
+                    text = "Precio: S/ $precio"
+                )
+
+
+                Text(
+                    text = "Cantidad: $cantidad"
+                )
+
+
+                Text(
+                    text = "Importe total: S/ %.2f".format(importe)
+                )
+
+            }
+
+        }
 
     }
 
