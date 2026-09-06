@@ -45,28 +45,31 @@ fun RegistroProductoScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(24.dp),
+
+        verticalArrangement = Arrangement.Top
     ) {
 
 
         Text(
             text = "Nuevo producto",
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineLarge
         )
 
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(8.dp)
         )
 
 
         Text(
-            text = "Complete los datos del producto para registrarlo"
+            text = "Complete los datos del producto para registrarlo",
+            style = MaterialTheme.typography.bodyMedium
         )
 
 
         Spacer(
-            modifier = Modifier.height(20.dp)
+            modifier = Modifier.height(24.dp)
         )
 
 
@@ -117,7 +120,7 @@ fun RegistroProductoScreen() {
 
 
         Spacer(
-            modifier = Modifier.height(20.dp)
+            modifier = Modifier.height(24.dp)
         )
 
 
@@ -129,6 +132,7 @@ fun RegistroProductoScreen() {
                             (cantidad.toIntOrNull() ?: 0)
 
             },
+
             modifier = Modifier.fillMaxWidth()
         ) {
 
@@ -140,7 +144,7 @@ fun RegistroProductoScreen() {
 
 
         Spacer(
-            modifier = Modifier.height(20.dp)
+            modifier = Modifier.height(24.dp)
         )
 
 
@@ -150,28 +154,38 @@ fun RegistroProductoScreen() {
 
 
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(20.dp)
             ) {
 
 
                 Text(
                     text = "Resumen del producto",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleLarge
                 )
 
 
                 Spacer(
-                    modifier = Modifier.height(10.dp)
+                    modifier = Modifier.height(16.dp)
                 )
 
 
                 Text(
-                    text = "Nombre: $nombre"
+                    text = "Producto: $nombre"
+                )
+
+
+                Spacer(
+                    modifier = Modifier.height(6.dp)
                 )
 
 
                 Text(
-                    text = "Precio: S/ $precio"
+                    text = "Precio unitario: S/ $precio"
+                )
+
+
+                Spacer(
+                    modifier = Modifier.height(6.dp)
                 )
 
 
@@ -180,8 +194,14 @@ fun RegistroProductoScreen() {
                 )
 
 
+                Spacer(
+                    modifier = Modifier.height(12.dp)
+                )
+
+
                 Text(
-                    text = "Importe total: S/ %.2f".format(importe)
+                    text = "Total: S/ %.2f".format(importe),
+                    style = MaterialTheme.typography.titleMedium
                 )
 
             }
