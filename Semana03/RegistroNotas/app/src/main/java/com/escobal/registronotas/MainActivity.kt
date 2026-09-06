@@ -46,6 +46,18 @@ fun RegistroNotasScreen() {
     }
 
 
+    // NUEVOS ESTADOS
+
+    var aprobado by remember {
+        mutableStateOf(false)
+    }
+
+
+    var favorito by remember {
+        mutableStateOf(false)
+    }
+
+
 
     Column(
         modifier = Modifier
@@ -107,7 +119,7 @@ fun RegistroNotasScreen() {
 
 
 
-        // PROGRAMACIÓN ORIENTADA A OBJETOS
+        // POO
 
         Text(
             text = "Programación Orientada a Objetos (25%)"
@@ -138,7 +150,7 @@ fun RegistroNotasScreen() {
 
 
 
-        // PROGRAMACIÓN EN MÓVILES
+        // MOVILES
 
         Text(
             text = "Programación en Móviles (30%)"
@@ -192,6 +204,67 @@ fun RegistroNotasScreen() {
         Text(
             text = "Nota elegida: $notaBaseDatos"
         )
+
+
+
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
+
+
+
+        // SWITCH
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+
+            Text(
+                text = "¿Curso aprobado?"
+            )
+
+
+            Switch(
+                checked = aprobado,
+
+                onCheckedChange = {
+                    aprobado = it
+                }
+            )
+
+        }
+
+
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+
+
+        // CHECKBOX
+
+        Row {
+
+
+            Checkbox(
+                checked = favorito,
+
+                onCheckedChange = {
+                    favorito = it
+                }
+            )
+
+
+            Text(
+                text = "Marcar como curso favorito"
+            )
+
+
+        }
 
 
     }
