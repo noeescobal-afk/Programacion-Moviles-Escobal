@@ -46,15 +46,24 @@ fun RegistroNotasScreen() {
     }
 
 
-    // NUEVOS ESTADOS
 
-    var aprobado by remember {
+    var redondear by remember {
         mutableStateOf(false)
     }
 
 
-    var favorito by remember {
+    var confirmado by remember {
         mutableStateOf(false)
+    }
+
+
+    var promedioPonderado by remember {
+        mutableStateOf(0.0)
+    }
+
+
+    var mensaje by remember {
+        mutableStateOf("Asigna las notas y confirma para calcular")
     }
 
 
@@ -88,8 +97,6 @@ fun RegistroNotasScreen() {
 
 
 
-        // FUNDAMENTOS
-
         Text(
             text = "Fundamentos de Programación (20%)"
         )
@@ -97,13 +104,10 @@ fun RegistroNotasScreen() {
 
         Slider(
             value = notaFundamentos.toFloat(),
-
             onValueChange = {
                 notaFundamentos = it.toInt()
             },
-
             valueRange = 0f..20f,
-
             steps = 19
         )
 
@@ -113,13 +117,12 @@ fun RegistroNotasScreen() {
         )
 
 
+
         Spacer(
             modifier = Modifier.height(16.dp)
         )
 
 
-
-        // POO
 
         Text(
             text = "Programación Orientada a Objetos (25%)"
@@ -128,13 +131,10 @@ fun RegistroNotasScreen() {
 
         Slider(
             value = notaPOO.toFloat(),
-
             onValueChange = {
                 notaPOO = it.toInt()
             },
-
             valueRange = 0f..20f,
-
             steps = 19
         )
 
@@ -144,13 +144,12 @@ fun RegistroNotasScreen() {
         )
 
 
+
         Spacer(
             modifier = Modifier.height(16.dp)
         )
 
 
-
-        // MOVILES
 
         Text(
             text = "Programación en Móviles (30%)"
@@ -159,13 +158,10 @@ fun RegistroNotasScreen() {
 
         Slider(
             value = notaMoviles.toFloat(),
-
             onValueChange = {
                 notaMoviles = it.toInt()
             },
-
             valueRange = 0f..20f,
-
             steps = 19
         )
 
@@ -175,13 +171,12 @@ fun RegistroNotasScreen() {
         )
 
 
+
         Spacer(
             modifier = Modifier.height(16.dp)
         )
 
 
-
-        // BASE DE DATOS
 
         Text(
             text = "Base de Datos (25%)"
@@ -190,13 +185,10 @@ fun RegistroNotasScreen() {
 
         Slider(
             value = notaBaseDatos.toFloat(),
-
             onValueChange = {
                 notaBaseDatos = it.toInt()
             },
-
             valueRange = 0f..20f,
-
             steps = 19
         )
 
@@ -217,21 +209,20 @@ fun RegistroNotasScreen() {
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
 
             Text(
-                text = "¿Curso aprobado?"
+                text = "Redondear promedio final"
             )
 
 
             Switch(
-                checked = aprobado,
+                checked = redondear,
 
                 onCheckedChange = {
-                    aprobado = it
+                    redondear = it
                 }
             )
 
@@ -251,18 +242,101 @@ fun RegistroNotasScreen() {
 
 
             Checkbox(
-                checked = favorito,
+                checked = confirmado,
 
                 onCheckedChange = {
-                    favorito = it
+                    confirmado = it
                 }
             )
 
 
             Text(
-                text = "Marcar como curso favorito"
+                text = "Confirmo que las notas son correctas"
             )
 
+        }
+
+
+
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
+
+
+
+        // BOTON CALCULAR
+
+        Button(
+
+            enabled = confirmado,
+
+            onClick = {
+
+
+                promedioPonderado =
+                    notaFundamentos * 0.20 +
+                            notaPOO * 0.25 +
+                            notaMoviles * 0.30 +
+                            notaBaseDatos * 0.25
+
+
+                mensaje =
+                    "Promedio calculado correctamente"
+
+
+            },
+
+            modifier = Modifier.fillMaxWidth()
+
+        ) {
+
+
+            Text(
+                text = "CALCULAR PROMEDIO"
+            )
+
+        }
+
+
+
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
+
+
+
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+
+                Text(
+                    text = "Resultado",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+
+
+                Text(
+                    text = mensaje
+                )
+
+
+                Text(
+                    text = "Promedio ponderado: %.2f".format(promedioPonderado)
+                )
+
+
+            }
 
         }
 
