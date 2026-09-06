@@ -75,59 +75,124 @@ fun RegistroNotasScreen() {
         )
 
 
+
+        // FUNDAMENTOS
+
         Text(
             text = "Fundamentos de Programación (20%)"
         )
 
 
+        Slider(
+            value = notaFundamentos.toFloat(),
+
+            onValueChange = {
+                notaFundamentos = it.toInt()
+            },
+
+            valueRange = 0f..20f,
+
+            steps = 19
+        )
+
+
         Text(
-            text = "Nota actual: $notaFundamentos"
+            text = "Nota elegida: $notaFundamentos"
         )
 
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(16.dp)
         )
 
+
+
+        // PROGRAMACIÓN ORIENTADA A OBJETOS
 
         Text(
             text = "Programación Orientada a Objetos (25%)"
         )
 
 
+        Slider(
+            value = notaPOO.toFloat(),
+
+            onValueChange = {
+                notaPOO = it.toInt()
+            },
+
+            valueRange = 0f..20f,
+
+            steps = 19
+        )
+
+
         Text(
-            text = "Nota actual: $notaPOO"
+            text = "Nota elegida: $notaPOO"
         )
 
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(16.dp)
         )
 
+
+
+        // PROGRAMACIÓN EN MÓVILES
 
         Text(
             text = "Programación en Móviles (30%)"
         )
 
 
+        Slider(
+            value = notaMoviles.toFloat(),
+
+            onValueChange = {
+                notaMoviles = it.toInt()
+            },
+
+            valueRange = 0f..20f,
+
+            steps = 19
+        )
+
+
         Text(
-            text = "Nota actual: $notaMoviles"
+            text = "Nota elegida: $notaMoviles"
         )
 
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(16.dp)
         )
 
+
+
+        // BASE DE DATOS
 
         Text(
             text = "Base de Datos (25%)"
         )
 
 
-        Text(
-            text = "Nota actual: $notaBaseDatos"
+        Slider(
+            value = notaBaseDatos.toFloat(),
+
+            onValueChange = {
+                notaBaseDatos = it.toInt()
+            },
+
+            valueRange = 0f..20f,
+
+            steps = 19
         )
+
+
+        Text(
+            text = "Nota elegida: $notaBaseDatos"
+        )
+
 
     }
 
