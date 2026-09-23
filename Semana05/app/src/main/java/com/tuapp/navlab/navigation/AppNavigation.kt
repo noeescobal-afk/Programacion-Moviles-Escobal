@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import com.tuapp.navlab.screens.DetailScreen
 import com.tuapp.navlab.screens.HomeScreen
 import com.tuapp.navlab.screens.ListScreen
+import com.tuapp.navlab.screens.LoginScreen
 import com.tuapp.navlab.screens.ProfileScreen
 
 @Composable
@@ -17,8 +18,12 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Login.route
     ) {
+        composable(Screen.Login.route) {
+            LoginScreen(navController)
+        }
+
         composable(Screen.Home.route) {
             HomeScreen(navController)
         }
@@ -39,9 +44,7 @@ fun AppNavigation() {
                 }
             )
         ) { backStackEntry ->
-            val itemId = requireNotNull(
-                backStackEntry.arguments
-            ).getInt("itemId")
+            val itemId = backStackEntry.arguments?.getInt("itemId") ?: -1
 
             DetailScreen(
                 navController = navController,
