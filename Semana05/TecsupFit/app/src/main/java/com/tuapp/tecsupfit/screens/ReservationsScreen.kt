@@ -12,17 +12,26 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tuapp.tecsupfit.components.CancelReservationDialog
 import com.tuapp.tecsupfit.components.ReservationCard
 import com.tuapp.tecsupfit.model.Reservation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservationsScreen(
-    reservations: List<Reservation>
+    reservations: List<Reservation>,
+    onCancelReservation: (Int) -> Unit
 ) {
+    var reservationIdToCancel by rememberSaveable { mutableStateOf<Int?>(null) }
+    val reservationToCancel = reservations.find { it.id == reservationIdToCancel }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -55,10 +64,28 @@ fun ReservationsScreen(
                 ),
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
             ) {
-                items(reservations) { reservation ->
-                    ReservationCard(reservation = reservation)
+                items(reservations, key = { it.id }) { reservation ->
+                    ReservationCard(
+                        reservation = reservation,
+                        onCancelClick = {
+                            if (reservation.status == "Confirmada") {
+                                reservationIdToCancel = reservation.id
+                            }
+                        }
+                    )
                 }
             }
+        }
+
+        reservationToCancel?.let { res ->
+            CancelReservationDialog(
+                reservation = res,
+                onDismiss = { reservationIdToCancel = null },
+                onConfirm = {
+                    onCancelReservation(res.id)
+                    reservationIdToCancel = null
+                }
+            )
         }
     }
 }

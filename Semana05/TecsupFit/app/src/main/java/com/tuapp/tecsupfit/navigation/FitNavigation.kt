@@ -3,9 +3,12 @@ package com.tuapp.tecsupfit.navigation
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,6 +24,7 @@ import com.tuapp.tecsupfit.screens.HomeScreen
 import com.tuapp.tecsupfit.screens.ProfileScreen
 import com.tuapp.tecsupfit.screens.ReservationsScreen
 import com.tuapp.tecsupfit.screens.RoutinesScreen
+import kotlinx.coroutines.launch
 
 @Composable
 fun FitNavigation() {
@@ -28,6 +32,8 @@ fun FitNavigation() {
     val reservations = remember {
         mutableStateListOf(FitnessData.initialReservation)
     }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     val navBackStackEntry = navController.currentBackStackEntryAsState().value
     val currentRoute = navBackStackEntry?.destination?.route
@@ -41,6 +47,7 @@ fun FitNavigation() {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (showBottomBar) {
                 FitBottomBar(navController = navController)
@@ -62,7 +69,19 @@ fun FitNavigation() {
             }
             composable(Screen.Reservations.route) {
                 ReservationsScreen(
-                    reservations = reservations
+                    reservations = reservations,
+                    onCancelReservation = { reservationId ->
+                        val index = reservations.indexOfFirst { it.id == reservationId }
+                        if (index != -1) {
+                            val res = reservations[index]
+                            if (res.status == "Confirmada") {
+                                reservations[index] = res.copy(status = "Cancelada")
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("La reserva fue cancelada")
+                                }
+                            }
+                        }
+                    }
                 )
             }
             composable(Screen.Routines.route) {
