@@ -1,5 +1,6 @@
 package com.tuapp.clinicasaludplus.navigation
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -42,12 +43,22 @@ fun ClinicNavigation() {
         drawerContent = {
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.padding(16.dp))
-                Text(
-                    text = "Clínica Salud+",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                Column(
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "Clínica Salud+",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "Portal del paciente",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
@@ -134,7 +145,9 @@ fun ClinicNavigation() {
                     doctorId = doctorId,
                     onBackClick = { navController.popBackStack() },
                     onConfirmAppointment = { newAppointment ->
-                        appointments.add(newAppointment)
+                        val nextId = (appointments.maxOfOrNull { it.id } ?: 0) + 1
+                        val appointmentWithId = newAppointment.copy(id = nextId)
+                        appointments.add(appointmentWithId)
                         navController.navigate(
                             Screen.Confirmation.createRoute(
                                 doctorId = doctorId,
@@ -192,6 +205,15 @@ fun ClinicNavigation() {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Home.route) { inclusive = true }
                             launchSingleTop = true
+                        }
+                    },
+                    onCancelAppointment = { appointmentToCancel ->
+                        val index = appointments.indexOfFirst { it.id == appointmentToCancel.id }
+                        if (index != -1) {
+                            val current = appointments[index]
+                            if (current.status.equals("Confirmada", ignoreCase = true)) {
+                                appointments[index] = current.copy(status = "Cancelada")
+                            }
                         }
                     }
                 )

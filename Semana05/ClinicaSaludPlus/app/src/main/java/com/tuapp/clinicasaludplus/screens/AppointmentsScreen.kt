@@ -4,21 +4,32 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tuapp.clinicasaludplus.components.AppointmentStatusLabel
+import com.tuapp.clinicasaludplus.components.CancelAppointmentDialog
 import com.tuapp.clinicasaludplus.model.Appointment
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppointmentsScreen(
     appointments: List<Appointment>,
     onMenuClick: () -> Unit,
-    onHomeClick: () -> Unit
+    onHomeClick: () -> Unit,
+    onCancelAppointment: (Appointment) -> Unit
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    var appointmentToCancel by remember { mutableStateOf<Appointment?>(null) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -32,7 +43,8 @@ fun AppointmentsScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -60,8 +72,11 @@ fun AppointmentsScreen(
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(appointments) { appointment ->
-                        AppointmentCard(appointment = appointment)
+                    items(appointments, key = { it.id }) { appointment ->
+                        AppointmentCard(
+                            appointment = appointment,
+                            onCancelClick = { appointmentToCancel = appointment }
+                        )
                     }
                 }
             }
@@ -73,66 +88,128 @@ fun AppointmentsScreen(
                 Text("Regresar al inicio")
             }
         }
-    }
-}
 
-@Composable
-fun AppointmentCard(appointment: Appointment) {
-    val isConfirmed = appointment.status.equals("Confirmada", ignoreCase = true)
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = appointment.doctorName,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Surface(
-                    shape = MaterialTheme.shapes.small,
-                    color = if (isConfirmed) statusConfirmedContainer() else statusCompletedContainer()
-                ) {
-                    Text(
-                        text = appointment.status,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = if (isConfirmed) statusConfirmedText() else statusCompletedText()
-                    )
+        if (appointmentToCancel != null) {
+            CancelAppointmentDialog(
+                appointment = appointmentToCancel!!,
+                onConfirm = {
+                    val appToCancel = appointmentToCancel
+                    appointmentToCancel = null
+                    if (appToCancel != null) {
+                        onCancelAppointment(appToCancel)
+                        scope.launch {
+                            snackbarHostState.showSnackbar("La cita fue cancelada")
+                        }
+                    }
+                },
+                onDismiss = {
+                    appointmentToCancel = null
                 }
-            }
-
-            Text(
-                text = "Especialidad: ${appointment.specialty}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "Fecha: ${appointment.date} — Hora: ${appointment.time}",
-                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
 }
 
 @Composable
-fun statusConfirmedContainer() = MaterialTheme.colorScheme.primaryContainer
+fun AppointmentCard(
+    appointment: Appointment,
+    onCancelClick: () -> Unit
+) {
+    val isConfirmed = appointment.status.equals("Confirmada", ignoreCase = true)
 
-@Composable
-fun statusConfirmedText() = MaterialTheme.colorScheme.onPrimaryContainer
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Text(
+                    text = appointment.doctorName,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                AppointmentStatusLabel(status = appointment.status)
+            }
 
-@Composable
-fun statusCompletedContainer() = MaterialTheme.colorScheme.surfaceVariant
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MedicalServices,
+                    contentDescription = "Especialidad",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = appointment.specialty,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
 
-@Composable
-fun statusCompletedText() = MaterialTheme.colorScheme.onSurfaceVariant
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CalendarToday,
+                        contentDescription = "Fecha",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = appointment.date,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Schedule,
+                        contentDescription = "Hora",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = appointment.time,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            if (isConfirmed) {
+                Spacer(modifier = Modifier.height(2.dp))
+                TextButton(
+                    onClick = onCancelClick,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Text(
+                        text = "Cancelar cita",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+    }
+}

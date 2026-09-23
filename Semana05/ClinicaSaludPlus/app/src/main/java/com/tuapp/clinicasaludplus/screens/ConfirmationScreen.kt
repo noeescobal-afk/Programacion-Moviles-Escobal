@@ -47,15 +47,16 @@ fun ConfirmationScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "¡Cita Confirmada!",
-                style = MaterialTheme.typography.headlineMedium
+                text = "¡Cita confirmada!",
+                style = MaterialTheme.typography.headlineSmall
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(
                     modifier = Modifier
@@ -69,15 +70,16 @@ fun ConfirmationScreen(
                     )
                     Text(
                         text = "Especialidad: $specialty",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Text(
                         text = "Fecha: $date",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
                         text = "Hora: $time",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
@@ -97,7 +99,7 @@ fun ConfirmationScreen(
                 onClick = onHomeClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Volver al inicio")
+                Text("Regresar al inicio")
             }
         }
     }

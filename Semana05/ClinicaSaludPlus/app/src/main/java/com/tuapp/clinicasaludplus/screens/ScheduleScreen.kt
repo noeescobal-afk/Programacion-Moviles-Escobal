@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tuapp.clinicasaludplus.components.SectionTitle
 import com.tuapp.clinicasaludplus.data.ClinicData
 import com.tuapp.clinicasaludplus.model.Appointment
 
@@ -65,64 +66,75 @@ fun ScheduleScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Doctor(a): ${doctor.name}",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Especialidad: ${doctor.specialty}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = "Seleccione una fecha",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        items(ClinicData.availableDates) { date ->
-                            FilterChip(
-                                selected = (selectedDate == date),
-                                onClick = { selectedDate = date },
-                                label = { Text(date) }
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = "Doctor(a): ${doctor.name}",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Especialidad: ${doctor.specialty}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = "Seleccione una hora",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SectionTitle(text = "Selecciona una fecha")
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(ClinicData.availableDates) { date ->
+                                FilterChip(
+                                    selected = (selectedDate == date),
+                                    onClick = { selectedDate = date },
+                                    label = { Text(date) }
+                                )
+                            }
+                        }
+                    }
 
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(ClinicData.availableTimes) { time ->
-                            FilterChip(
-                                selected = (selectedTime == time),
-                                onClick = { selectedTime = time },
-                                label = { Text(time) }
-                            )
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SectionTitle(text = "Selecciona un horario")
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(ClinicData.availableTimes) { time ->
+                                FilterChip(
+                                    selected = (selectedTime == time),
+                                    onClick = { selectedTime = time },
+                                    label = { Text(time) }
+                                )
+                            }
                         }
                     }
                 }
 
                 val isFormValid = selectedDate != null && selectedTime != null
 
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Button(
                     onClick = {
                         if (isFormValid) {
                             val newAppointment = Appointment(
-                                id = 0, // will be assigned or tracked
+                                id = 0,
                                 doctorName = doctor.name,
                                 specialty = doctor.specialty,
                                 date = selectedDate!!,
@@ -133,9 +145,7 @@ fun ScheduleScreen(
                         }
                     },
                     enabled = isFormValid,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Confirmar cita")
                 }
