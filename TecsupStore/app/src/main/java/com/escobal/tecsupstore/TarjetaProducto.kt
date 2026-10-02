@@ -19,8 +19,15 @@ fun TarjetaProducto(producto: Producto) {
                 Text(producto.nombre, style = MaterialTheme.typography.titleMedium)
                 Text("S/ ${producto.precio}")
             }
-            IconButton(onClick = { expanded = true }) {
-                Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
+            Box {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
+                }
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    DropdownMenuItem(text = { Text("Favoritos") }, onClick = { expanded = false })
+                    DropdownMenuItem(text = { Text("Compartir") }, onClick = { expanded = false })
+                    DropdownMenuItem(text = { Text("Reportar") }, onClick = { expanded = false })
+                }
             }
         }
     }
