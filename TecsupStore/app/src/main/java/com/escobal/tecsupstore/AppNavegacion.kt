@@ -5,10 +5,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 
@@ -18,18 +20,23 @@ fun AppNavegacion() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val rutaActual = backStackEntry?.destination?.route
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            AppDrawer(onNavegar = { ruta ->
-                scope.launch { drawerState.close() }
-                navController.navigate(ruta) {
-                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
+            AppDrawer(
+                rutaActual = rutaActual,
+                onNavegar = { ruta ->
+                    scope.launch { drawerState.close() }
+                    navController.navigate(ruta) {
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
-            })
+            )
         }
     ) {
         Scaffold(
