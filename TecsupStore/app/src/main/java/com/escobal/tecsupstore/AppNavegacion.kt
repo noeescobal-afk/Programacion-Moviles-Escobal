@@ -22,7 +22,14 @@ fun AppNavegacion() {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            AppDrawer(onNavegar = { scope.launch { drawerState.close() } })
+            AppDrawer(onNavegar = { ruta ->
+                scope.launch { drawerState.close() }
+                navController.navigate(ruta) {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            })
         }
     ) {
         Scaffold(
