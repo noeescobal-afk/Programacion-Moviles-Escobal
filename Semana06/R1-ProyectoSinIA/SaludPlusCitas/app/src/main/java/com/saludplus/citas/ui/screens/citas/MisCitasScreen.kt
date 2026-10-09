@@ -33,6 +33,7 @@ import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BotonPrincipal
 import com.saludplus.citas.ui.components.MensajeListaVacia
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
+import com.saludplus.citas.ui.components.formatearFechaEspanol
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -188,7 +189,7 @@ fun MisCitasScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = "📅 ${cita.fecha}",
+                                        text = "📅 ${formatearFechaEspanol(cita.fecha)}",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

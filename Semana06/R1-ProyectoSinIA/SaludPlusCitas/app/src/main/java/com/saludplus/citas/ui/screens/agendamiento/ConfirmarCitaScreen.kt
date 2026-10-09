@@ -30,9 +30,8 @@ import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
 import com.saludplus.citas.ui.components.BotonPrincipal
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import com.saludplus.citas.ui.components.formatearFechaEspanol
+
 
 @Composable
 fun ConfirmarCitaScreen(
@@ -46,25 +45,6 @@ fun ConfirmarCitaScreen(
     val usuario = Repositorio.usuarioActual
     val medico = Repositorio.obtenerMedico(medicoId)
     val especialidad = if (medico != null) Repositorio.obtenerEspecialidad(medico.especialidadId) else null
-    val fechaFormateada = remember(fecha) {
-        try {
-            val formatoEntrada = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            val fechaLocalDate = LocalDate.parse(fecha, formatoEntrada)
-            val localeEs = Locale.forLanguageTag("es-ES")
-
-            val diaSemana = fechaLocalDate
-                .format(DateTimeFormatter.ofPattern("EEEE", localeEs))
-                .replaceFirstChar { it.uppercase() }
-
-            val mes = fechaLocalDate
-                .format(DateTimeFormatter.ofPattern("MMMM", localeEs))
-                .replace("septiembre", "setiembre")
-
-            "$diaSemana ${fechaLocalDate.dayOfMonth} de $mes ${fechaLocalDate.year}"
-        } catch (_: Exception) {
-            fecha
-        }
-    }
 
     var mensajeError by remember { mutableStateOf("") }
     var procesando by remember { mutableStateOf(false) }
@@ -145,7 +125,7 @@ fun ConfirmarCitaScreen(
 
                     ElementoResumen(
                         etiqueta = "Fecha:",
-                        valor = fechaFormateada
+                        valor = formatearFechaEspanol(fecha)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 

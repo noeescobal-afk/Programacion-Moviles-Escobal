@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BotonPrincipal
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
+import com.saludplus.citas.ui.components.formatearFechaEspanol
 
 @Composable
 fun CitaExitosaScreen(
@@ -123,7 +124,7 @@ fun CitaExitosaScreen(
 
                         FilaDetalle(
                             etiqueta = "Fecha:",
-                            valor = cita.fecha
+                            valor = formatearFechaEspanol(cita.fecha)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
