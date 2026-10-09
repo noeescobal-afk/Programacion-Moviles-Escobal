@@ -1,5 +1,6 @@
 package com.saludplus.citas.ui.screens.citas
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,11 +42,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.saludplus.citas.R
 import com.saludplus.citas.data.model.Cita
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.formatearFechaEspanol
@@ -272,21 +277,34 @@ private fun TarjetaCita(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                            color = AzulClaroCitas,
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.EventAvailable,
-                        contentDescription = null,
-                        tint = AzulCitas,
-                        modifier = Modifier.size(25.dp)
+                val imagenMedico = obtenerImagenMedicoCita(cita.medicoId)
+
+                if (imagenMedico != null) {
+                    Image(
+                        painter = painterResource(id = imagenMedico),
+                        contentDescription = medico?.nombre,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(CircleShape)
                     )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .background(
+                                color = AzulClaroCitas,
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.EventAvailable,
+                            contentDescription = null,
+                            tint = AzulCitas,
+                            modifier = Modifier.size(25.dp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.size(12.dp))
@@ -451,6 +469,23 @@ private fun EstadoCitasVacio(
                 fontWeight = FontWeight.Bold
             )
         }
+    }
+}
+
+
+private fun obtenerImagenMedicoCita(medicoId: Int): Int? {
+    return when (medicoId) {
+        1 -> R.drawable.medico_1
+        2 -> R.drawable.medico_2
+        3 -> R.drawable.medico_3
+        4 -> R.drawable.medico_4
+        5 -> R.drawable.medico_5
+        6 -> R.drawable.medico_6
+        7 -> R.drawable.medico_7
+        8 -> R.drawable.medico_8
+        9 -> R.drawable.medico_9
+        10 -> R.drawable.medico_10
+        else -> null
     }
 }
 
