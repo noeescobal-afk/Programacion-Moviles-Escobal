@@ -228,8 +228,8 @@ fun AppNavigation(
                     navController.navigate(
                         Rutas.citaExitosa(citaId)
                     ) {
-                        popUpTo(Rutas.ESPECIALIDADES) {
-                            inclusive = true
+                        popUpTo(Rutas.INICIO) {
+                            inclusive = false
                         }
                     }
                 },
