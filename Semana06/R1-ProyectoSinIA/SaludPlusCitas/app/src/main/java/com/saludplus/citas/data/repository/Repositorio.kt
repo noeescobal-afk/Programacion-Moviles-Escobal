@@ -66,6 +66,7 @@ object Repositorio {
         )
 
         usuarios.add(nuevoUsuario)
+        _usuarioActual = nuevoUsuario
         return true
     }
 
