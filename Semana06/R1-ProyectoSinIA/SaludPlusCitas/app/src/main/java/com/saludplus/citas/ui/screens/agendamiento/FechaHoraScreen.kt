@@ -57,10 +57,11 @@ fun FechaHoraScreen(
     val hoy = remember { LocalDate.now() }
 
     // Offset de semanas desde la semana actual
-    var semanaOffset by remember { mutableIntStateOf(0) }
+// Índice del bloque de 5 días hábiles mostrado
+    var bloqueOffset by remember { mutableIntStateOf(0) }
 
-    // Fecha inicial base (si hoy es fin de semana, apunta al próximo lunes)
-    val baseHoy = remember(hoy) {
+// Primer día hábil disponible desde la fecha actual
+    val primerDiaHabil = remember(hoy) {
         when (hoy.dayOfWeek) {
             DayOfWeek.SATURDAY -> hoy.plusDays(2)
             DayOfWeek.SUNDAY -> hoy.plusDays(1)
@@ -68,20 +69,10 @@ fun FechaHoraScreen(
         }
     }
 
-    val inicioSemana = remember(baseHoy, semanaOffset) {
-        baseHoy.with(DayOfWeek.MONDAY).plusWeeks(semanaOffset.toLong())
-    }
-
-    // Obtener los 5 días hábiles (Lunes a Viernes) descartando días pasados
-// Obtener siempre 5 días hábiles consecutivos, sin fechas pasadas
-    val diasHabiles = remember(inicioSemana, hoy, semanaOffset) {
+    // Genera cinco días hábiles consecutivos desde una fecha
+    fun generarDiasHabiles(desde: LocalDate): List<LocalDate> {
         val dias = mutableListOf<LocalDate>()
-
-        var fecha = if (semanaOffset == 0 && inicioSemana.isBefore(hoy)) {
-            hoy
-        } else {
-            inicioSemana
-        }
+        var fecha = desde
 
         while (dias.size < 5) {
             if (
@@ -94,7 +85,26 @@ fun FechaHoraScreen(
             fecha = fecha.plusDays(1)
         }
 
-        dias
+        return dias
+    }
+
+// Cada bloque comienza después del último día hábil del bloque anterior
+    val diasHabiles = remember(primerDiaHabil, bloqueOffset) {
+        var inicioBloque = primerDiaHabil
+
+        repeat(bloqueOffset) {
+            val bloqueAnterior = generarDiasHabiles(inicioBloque)
+            inicioBloque = bloqueAnterior.last().plusDays(1)
+
+            while (
+                inicioBloque.dayOfWeek == DayOfWeek.SATURDAY ||
+                inicioBloque.dayOfWeek == DayOfWeek.SUNDAY
+            ) {
+                inicioBloque = inicioBloque.plusDays(1)
+            }
+        }
+
+        generarDiasHabiles(inicioBloque)
     }
 
     // Formateadores en español
@@ -102,9 +112,10 @@ fun FechaHoraScreen(
     val diaNombreFormatter = remember(localeEs) { DateTimeFormatter.ofPattern("EEE", localeEs) }
     val repoDateFormatter = remember { DateTimeFormatter.ofPattern("dd/MM/yyyy") }
 
-    val mesAnioTexto = remember(diasHabiles, inicioSemana) {
-        val referencia = diasHabiles.firstOrNull() ?: inicioSemana
-        referencia.format(mesAnioFormatter).replaceFirstChar { it.uppercase() }
+    val mesAnioTexto = remember(diasHabiles) {
+        diasHabiles.first()
+            .format(mesAnioFormatter)
+            .replaceFirstChar { it.uppercase() }
     }
 
     var fechaSeleccionada by remember { mutableStateOf<LocalDate?>(null) }
@@ -157,22 +168,25 @@ fun FechaHoraScreen(
             ) {
                 IconButton(
                     onClick = {
-                        if (semanaOffset > 0) {
-                            semanaOffset--
+                        if (bloqueOffset > 0) {
+                            bloqueOffset--
                             fechaSeleccionada = null
                             horaSeleccionada = null
                         }
                     },
-                    enabled = semanaOffset > 0
+                    enabled = bloqueOffset > 0
                 ) {
                     Text(
                         text = "‹",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (semanaOffset > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        color = if (bloqueOffset > 0) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        }
                     )
                 }
-
                 Text(
                     text = mesAnioTexto,
                     style = MaterialTheme.typography.titleMedium,
@@ -182,7 +196,7 @@ fun FechaHoraScreen(
 
                 IconButton(
                     onClick = {
-                        semanaOffset++
+                        bloqueOffset++
                         fechaSeleccionada = null
                         horaSeleccionada = null
                     }
