@@ -1,5 +1,6 @@
 package com.saludplus.citas.data.repository
 
+import com.saludplus.citas.data.model.Cita
 import com.saludplus.citas.data.model.Especialidad
 import com.saludplus.citas.data.model.Medico
 import com.saludplus.citas.data.model.Usuario
@@ -29,6 +30,12 @@ object Repositorio {
         Medico(8, "Dra. María Flores", 5, "CMP-52345"),
         Medico(9, "Dr. Ricardo Silva", 6, "CMP-62345"),
         Medico(10, "Dra. Patricia Morales", 7, "CMP-72345")
+    )
+
+    private val citas = mutableListOf<Cita>()
+
+    private val horariosBase = listOf(
+        "08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"
     )
 
     private var _usuarioActual: Usuario? = null
@@ -118,5 +125,69 @@ object Repositorio {
         return medicosEspecialidad
             .filter { it.nombre.contains(texto.trim(), ignoreCase = true) }
             .sortedBy { it.nombre }
+    }
+
+    fun horariosDisponibles(medicoId: Int, fecha: String): List<String> {
+        val horasOcupadas = citas
+            .filter { it.medicoId == medicoId && it.fecha == fecha && it.estado != "Cancelada" }
+            .map { it.hora }
+
+        return horariosBase.filter { it !in horasOcupadas }
+    }
+
+    fun agendarCita(
+        usuarioId: Int,
+        medicoId: Int,
+        fecha: String,
+        hora: String
+    ): Cita? {
+        if (usuarioId <= 0 || medicoId <= 0 || fecha.isBlank() || hora.isBlank()) {
+            return null
+        }
+
+        val existeUsuario = usuarios.any { it.id == usuarioId }
+        val existeMedico = medicos.any { it.id == medicoId }
+        if (!existeUsuario || !existeMedico) {
+            return null
+        }
+
+        val disponibles = horariosDisponibles(medicoId, fecha)
+        if (hora !in disponibles) {
+            return null
+        }
+
+        val nuevoId = (citas.maxOfOrNull { it.id } ?: 0) + 1
+        val nuevaCita = Cita(
+            id = nuevoId,
+            usuarioId = usuarioId,
+            medicoId = medicoId,
+            fecha = fecha.trim(),
+            hora = hora.trim(),
+            estado = "Programada"
+        )
+
+        citas.add(nuevaCita)
+        return nuevaCita
+    }
+
+    fun obtenerCita(id: Int): Cita? {
+        return citas.find { it.id == id }
+    }
+
+    fun citasDelUsuario(usuarioId: Int): List<Cita> {
+        return citas
+            .filter { it.usuarioId == usuarioId }
+            .sortedWith(compareBy<Cita> { it.fecha }.thenBy { it.hora })
+    }
+
+    fun cancelarCita(citaId: Int): Boolean {
+        val citaExistente = citas.find { it.id == citaId } ?: return false
+        citas.remove(citaExistente)
+        citas.add(citaExistente.copy(estado = "Cancelada"))
+        return true
+    }
+
+    fun obtenerCitas(): List<Cita> {
+        return citas.toList()
     }
 }
