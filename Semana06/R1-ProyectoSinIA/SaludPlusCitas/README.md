@@ -540,7 +540,50 @@ El historial incluye commits independientes para:
 
 La segunda fase incorpora mejoras adicionales en una rama de trabajo independiente.
 
----
+## Fase 2 - Mejoras con asistencia de IA
+La segunda fase del laboratorio se desarrolló en la rama:
+
+`semana06-mejora-ia`
+
+Esta fase parte de la implementación funcional de la primera versión e incorpora mejoras en la experiencia de usuario, el calendario de agendamiento, la presentación de fechas, las validaciones y el diseño visual.
+
+### Calendario dinámico
+
+Se reemplazaron las fechas fijas de `FechaHoraScreen` por un calendario dinámico basado en `java.time.LocalDate`.
+
+La pantalla ahora permite:
+
+- Mostrar los próximos 5 días hábiles.
+- Excluir sábados y domingos.
+- Evitar fechas anteriores al día actual.
+- Avanzar y retroceder entre bloques de días hábiles.
+- Mostrar dinámicamente el mes y año.
+- Reiniciar la hora seleccionada cuando cambia la fecha.
+- Mantener `LazyRow` para las fechas.
+- Mantener `LazyVerticalGrid` para los horarios.
+- Ocultar horarios que ya fueron reservados.
+
+El repositorio continúa trabajando internamente con fechas en formato `dd/MM/yyyy`, conservando compatibilidad con el flujo original.
+
+### Mejoras de interfaz
+
+Se renovó progresivamente la interfaz utilizando Material 3 y manteniendo la lógica existente. Se mejoraron las pantallas de Inicio, Especialidades, Médicos, Fecha y hora, Confirmación, Mis citas, Detalle de cita, Perfil, Resultados, Notificaciones, Login, Registro y Splash.
+
+También se incorporaron recursos gráficos locales para los médicos y una ilustración médica para la pantalla inicial.
+
+### Validaciones de usuarios
+
+El registro fue reforzado para comprobar nombres válidos, estructura del correo electrónico, correos duplicados, longitud de contraseña, presencia de letras y números y coincidencia de las contraseñas.
+
+Las validaciones principales también se realizan desde el repositorio para no depender únicamente de la interfaz.
+
+Además, el perfil muestra la fotografía personalizada únicamente para la cuenta correspondiente y utiliza un avatar genérico para los demás usuarios.
+
+### Uso de IA
+
+El detalle de los prompts, resultados y correcciones realizadas durante esta fase se encuentra documentado en `PROMPTS.md`.
+
+La asistencia de IA se utilizó como apoyo para plantear mejoras. Las propuestas fueron posteriormente verificadas mediante compilación y pruebas funcionales en el emulador.
 
 ## Observaciones
 
@@ -550,7 +593,9 @@ La segunda fase incorpora mejoras adicionales en una rama de trabajo independien
 
 3. La disponibilidad de horarios depende tanto del médico como de la fecha seleccionada. Al excluir las citas canceladas de las horas ocupadas, el horario puede ser reutilizado correctamente después de una cancelación.
 
----
+4. En la segunda fase, reemplazar las fechas fijas por `LocalDate` permitió que el agendamiento se adapte automáticamente a la fecha de ejecución. Las pruebas mostraron que el cálculo debía considerar correctamente los fines de semana para mantener siempre cinco días hábiles disponibles.
+
+5. Las mejoras realizadas con apoyo de IA requirieron validación mediante compilación y ejecución en el emulador. Estas pruebas permitieron detectar y corregir situaciones como la continuidad de los bloques de fechas y la asignación de la fotografía de perfil únicamente al usuario correspondiente.
 
 ## Conclusiones
 
@@ -562,8 +607,9 @@ La segunda fase incorpora mejoras adicionales en una rama de trabajo independien
 
 4. Las pruebas funcionales permitieron detectar y corregir situaciones que no eran evidentes únicamente mediante compilación, como la sesión posterior al registro y el comportamiento del back stack al iniciar una reserva desde una especialidad destacada.
 
----
+5. La comparación entre ambas fases demuestra que una primera versión funcional y correctamente estructurada facilita incorporar posteriormente mejoras visuales y de experiencia de usuario sin reconstruir la lógica principal de la aplicación.
 
+6. La asistencia de IA fue útil para plantear mejoras como el calendario dinámico y orientar cambios de interfaz; sin embargo, las pruebas manuales continuaron siendo necesarias para verificar el cumplimiento de los requisitos y corregir comportamientos no previstos.
 ## Autor
 
 **Noe Oswaldo Escobal**
