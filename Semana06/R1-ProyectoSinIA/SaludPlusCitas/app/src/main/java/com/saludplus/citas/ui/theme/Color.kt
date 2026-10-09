@@ -2,10 +2,33 @@ package com.saludplus.citas.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Identidad principal SaludPlus
+val SaludPlusBlue = Color(0xFF246BFD)
+val SaludPlusBlueDark = Color(0xFF174EA6)
+val SaludPlusBlueLight = Color(0xFFDCE8FF)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val SaludPlusGreen = Color(0xFF22A06B)
+val SaludPlusGreenLight = Color(0xFFDDF6EA)
+
+val SaludPlusOrange = Color(0xFFF59E42)
+val SaludPlusOrangeLight = Color(0xFFFFEBD6)
+
+val SaludPlusPink = Color(0xFFE85D8E)
+val SaludPlusPinkLight = Color(0xFFFFE1EC)
+
+val SaludPlusCyan = Color(0xFF35A7C8)
+val SaludPlusCyanLight = Color(0xFFDDF5FA)
+
+// Superficies
+val SaludPlusBackground = Color(0xFFF8FAFF)
+val SaludPlusSurface = Color(0xFFFFFFFF)
+val SaludPlusSurfaceVariant = Color(0xFFF0F4FA)
+
+// Texto
+val SaludPlusText = Color(0xFF172033)
+val SaludPlusTextSecondary = Color(0xFF667085)
+
+// Tema oscuro
+val SaludPlusBlueDarkTheme = Color(0xFFADC6FF)
+val SaludPlusGreenDarkTheme = Color(0xFF8DDBB5)
+val SaludPlusPinkDarkTheme = Color(0xFFFFB0C8)
