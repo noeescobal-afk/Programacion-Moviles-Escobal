@@ -1,27 +1,23 @@
 package com.saludplus.citas.ui.screens.auth
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.HealthAndSafety
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -30,8 +26,10 @@ import androidx.compose.ui.unit.dp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
 import com.saludplus.citas.ui.components.BotonPrincipal
-import com.saludplus.citas.ui.components.CampoTexto
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
+
+private val AzulRegistro = Color(0xFF246BFD)
+private val AzulClaroRegistro = Color(0xFFE8F0FF)
 
 @Composable
 fun RegistroScreen(
@@ -48,105 +46,36 @@ fun RegistroScreen(
     var mensajeError by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = {
-            BarraSuperior(
-                titulo = "Crear cuenta",
-                onVolverAtras = onVolverAtras
-            )
-        },
+        topBar = { BarraSuperior(titulo = "Crear cuenta", onVolverAtras = onVolverAtras) },
         modifier = modifier
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            modifier = Modifier.fillMaxSize().padding(innerPadding).verticalScroll(rememberScrollState()).padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Regístrate para agendar tus citas médicas",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Box(modifier = Modifier.size(76.dp).background(AzulClaroRegistro, CircleShape), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.HealthAndSafety, null, tint = AzulRegistro, modifier = Modifier.size(38.dp))
+            }
+            Spacer(Modifier.height(16.dp))
+            Text("Crea tu cuenta", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(5.dp))
+            Text("Regístrate para agendar y gestionar tus citas médicas.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(24.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
+            OutlinedTextField(value = nombre, onValueChange = { nombre = it; if (mensajeError.isNotEmpty()) mensajeError = "" }, label = { Text("Nombre completo") }, leadingIcon = { Icon(Icons.Filled.Person, null) }, singleLine = true, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(13.dp))
+            OutlinedTextField(value = correo, onValueChange = { correo = it; if (mensajeError.isNotEmpty()) mensajeError = "" }, label = { Text("Correo electrónico") }, leadingIcon = { Icon(Icons.Filled.Email, null) }, singleLine = true, shape = RoundedCornerShape(14.dp), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(13.dp))
+            OutlinedTextField(value = password, onValueChange = { password = it; if (mensajeError.isNotEmpty()) mensajeError = "" }, label = { Text("Contraseña") }, leadingIcon = { Icon(Icons.Filled.Lock, null) }, singleLine = true, shape = RoundedCornerShape(14.dp), visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(13.dp))
+            OutlinedTextField(value = confirmarPassword, onValueChange = { confirmarPassword = it; if (mensajeError.isNotEmpty()) mensajeError = "" }, label = { Text("Confirmar contraseña") }, leadingIcon = { Icon(Icons.Filled.Lock, null) }, singleLine = true, shape = RoundedCornerShape(14.dp), visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), modifier = Modifier.fillMaxWidth())
 
-            // Campo Nombre Completo
-            CampoTexto(
-                value = nombre,
-                onValueChange = {
-                    nombre = it
-                    if (mensajeError.isNotEmpty()) mensajeError = ""
-                },
-                label = "Nombre completo"
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo Correo Electrónico
-            OutlinedTextField(
-                value = correo,
-                onValueChange = {
-                    correo = it
-                    if (mensajeError.isNotEmpty()) mensajeError = ""
-                },
-                label = { Text("Correo electrónico") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo Contraseña
-            OutlinedTextField(
-                value = password,
-                onValueChange = {
-                    password = it
-                    if (mensajeError.isNotEmpty()) mensajeError = ""
-                },
-                label = { Text("Contraseña") },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo Confirmar Contraseña
-            OutlinedTextField(
-                value = confirmarPassword,
-                onValueChange = {
-                    confirmarPassword = it
-                    if (mensajeError.isNotEmpty()) mensajeError = ""
-                },
-                label = { Text("Confirmar contraseña") },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Mostrar Mensaje de Error si existe
             if (mensajeError.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = mensajeError,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Spacer(Modifier.height(12.dp))
+                Text(mensajeError, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Botón Crear cuenta
+            Spacer(Modifier.height(22.dp))
             BotonPrincipal(
                 texto = "Crear cuenta",
                 onClick = {
@@ -157,28 +86,20 @@ fun RegistroScreen(
                         mensajeError = "Por favor, completa todos los campos"
                         return@BotonPrincipal
                     }
-
                     if (!correoTrim.contains("@") || !correoTrim.contains(".")) {
                         mensajeError = "Por favor, ingresa un correo electrónico válido"
                         return@BotonPrincipal
                     }
-
                     if (password.length < 6) {
                         mensajeError = "La contraseña debe tener al menos 6 caracteres"
                         return@BotonPrincipal
                     }
-
                     if (password != confirmarPassword) {
                         mensajeError = "Las contraseñas no coinciden"
                         return@BotonPrincipal
                     }
 
-                    val registrado = Repositorio.registrarUsuario(
-                        nombre = nombreTrim,
-                        correo = correoTrim,
-                        password = password
-                    )
-
+                    val registrado = Repositorio.registrarUsuario(nombre = nombreTrim, correo = correoTrim, password = password)
                     if (registrado) {
                         mensajeError = ""
                         onRegistroExitoso()
@@ -187,26 +108,12 @@ fun RegistroScreen(
                     }
                 }
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Opción Iniciar Sesión
+            Spacer(Modifier.height(10.dp))
             TextButton(onClick = onIniciarSesion) {
-                Text(
-                    text = "¿Ya tienes una cuenta? Iniciar sesión",
-                    style = MaterialTheme.typography.labelLarge
-                )
+                Text("¿Ya tienes una cuenta? Iniciar sesión", color = AzulRegistro, fontWeight = FontWeight.SemiBold)
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Términos y Condiciones
             TextButton(onClick = onVerTerminos) {
-                Text(
-                    text = "Ver términos y condiciones",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.tertiary
-                )
+                Text("Ver términos y condiciones", style = MaterialTheme.typography.labelMedium, color = AzulRegistro)
             }
         }
     }
@@ -216,11 +123,6 @@ fun RegistroScreen(
 @Composable
 fun RegistroScreenPreview() {
     SaludPlusCitasTheme {
-        RegistroScreen(
-            onRegistroExitoso = {},
-            onIniciarSesion = {},
-            onVerTerminos = {},
-            onVolverAtras = {}
-        )
+        RegistroScreen(onRegistroExitoso = {}, onIniciarSesion = {}, onVerTerminos = {}, onVolverAtras = {})
     }
 }

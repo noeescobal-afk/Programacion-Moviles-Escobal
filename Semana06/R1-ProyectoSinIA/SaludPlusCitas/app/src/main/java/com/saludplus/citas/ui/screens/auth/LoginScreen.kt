@@ -1,27 +1,34 @@
 package com.saludplus.citas.ui.screens.auth
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.HealthAndSafety
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -31,6 +38,9 @@ import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
 import com.saludplus.citas.ui.components.BotonPrincipal
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
+
+private val AzulLogin = Color(0xFF246BFD)
+private val AzulClaroLogin = Color(0xFFE8F0FF)
 
 @Composable
 fun LoginScreen(
@@ -44,92 +54,60 @@ fun LoginScreen(
     var mensajeError by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = {
-            BarraSuperior(
-                titulo = "Iniciar sesión",
-                onVolverAtras = onVolverAtras
-            )
-        },
+        topBar = { BarraSuperior(titulo = "Iniciar sesión", onVolverAtras = onVolverAtras) },
         modifier = modifier
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            modifier = Modifier.fillMaxSize().padding(innerPadding).verticalScroll(rememberScrollState()).padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "¡Bienvenido de nuevo! Ingresa a tu cuenta para gestionar tus citas.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Box(modifier = Modifier.size(82.dp).background(AzulClaroLogin, CircleShape), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.HealthAndSafety, null, tint = AzulLogin, modifier = Modifier.size(42.dp))
+            }
+            Spacer(Modifier.height(18.dp))
+            Text("¡Bienvenido de nuevo!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(6.dp))
+            Text("Ingresa a tu cuenta para gestionar tus citas.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(28.dp))
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Campo Correo electrónico
             OutlinedTextField(
                 value = correo,
-                onValueChange = {
-                    correo = it
-                    if (mensajeError.isNotEmpty()) mensajeError = ""
-                },
+                onValueChange = { correo = it; if (mensajeError.isNotEmpty()) mensajeError = "" },
                 label = { Text("Correo electrónico") },
+                leadingIcon = { Icon(Icons.Filled.Email, null) },
                 singleLine = true,
+                shape = RoundedCornerShape(14.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth()
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo Contraseña
+            Spacer(Modifier.height(14.dp))
             OutlinedTextField(
                 value = password,
-                onValueChange = {
-                    password = it
-                    if (mensajeError.isNotEmpty()) mensajeError = ""
-                },
+                onValueChange = { password = it; if (mensajeError.isNotEmpty()) mensajeError = "" },
                 label = { Text("Contraseña") },
+                leadingIcon = { Icon(Icons.Filled.Lock, null) },
                 singleLine = true,
+                shape = RoundedCornerShape(14.dp),
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Mostrar Mensaje de Error si existe
             if (mensajeError.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = mensajeError,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Spacer(Modifier.height(12.dp))
+                Text(mensajeError, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Botón Iniciar Sesión
+            Spacer(Modifier.height(24.dp))
             BotonPrincipal(
                 texto = "Iniciar sesión",
                 onClick = {
                     val correoTrim = correo.trim()
-
                     if (correoTrim.isEmpty() || password.isEmpty()) {
                         mensajeError = "Completa tu correo y contraseña"
                         return@BotonPrincipal
                     }
-
-                    val loginCorrecto = Repositorio.iniciarSesion(
-                        correo = correoTrim,
-                        password = password
-                    )
-
+                    val loginCorrecto = Repositorio.iniciarSesion(correo = correoTrim, password = password)
                     if (loginCorrecto) {
                         mensajeError = ""
                         onLoginExitoso()
@@ -138,15 +116,9 @@ fun LoginScreen(
                     }
                 }
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Opción Crear cuenta
+            Spacer(Modifier.height(14.dp))
             TextButton(onClick = onCrearCuenta) {
-                Text(
-                    text = "¿No tienes una cuenta? Crear cuenta",
-                    style = MaterialTheme.typography.labelLarge
-                )
+                Text("¿No tienes una cuenta? Crear cuenta", color = AzulLogin, fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -156,10 +128,6 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreview() {
     SaludPlusCitasTheme {
-        LoginScreen(
-            onLoginExitoso = {},
-            onCrearCuenta = {},
-            onVolverAtras = {}
-        )
+        LoginScreen(onLoginExitoso = {}, onCrearCuenta = {}, onVolverAtras = {})
     }
 }
