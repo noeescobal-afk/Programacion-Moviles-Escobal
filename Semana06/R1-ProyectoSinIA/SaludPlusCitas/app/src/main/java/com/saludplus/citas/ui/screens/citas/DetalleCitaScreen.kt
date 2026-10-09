@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
+import com.saludplus.citas.ui.components.formatearFechaEspanol
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
 
 @Composable
@@ -106,7 +107,7 @@ fun DetalleCitaScreen(
 
                         FilaDetalleCita(
                             etiqueta = "Fecha:",
-                            valor = cita.fecha
+                            valor = formatearFechaEspanol(cita.fecha)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
