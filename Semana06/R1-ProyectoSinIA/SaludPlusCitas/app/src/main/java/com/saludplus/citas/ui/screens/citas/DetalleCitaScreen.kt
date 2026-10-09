@@ -2,6 +2,7 @@ package com.saludplus.citas.ui.screens.citas
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,15 +20,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -42,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -54,13 +59,12 @@ import com.saludplus.citas.ui.components.BarraSuperior
 import com.saludplus.citas.ui.components.formatearFechaEspanol
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
 
-private val AzulDetalle = Color(0xFF246BFD)
-private val AzulClaroDetalle = Color(0xFFE8F0FF)
+private val AzulElectric = Color(0xFF246BFD)
+private val AzulIce = Color(0xFFEBF2FE)
 private val VerdeDetalle = Color(0xFF168A65)
 private val VerdeClaroDetalle = Color(0xFFDDF6EA)
 private val RojoDetalle = Color(0xFFC9362B)
 private val RojoClaroDetalle = Color(0xFFFFE7E5)
-private val FondoDetalle = Color(0xFFF5F7FB)
 
 @Composable
 fun DetalleCitaScreen(
@@ -74,6 +78,7 @@ fun DetalleCitaScreen(
     val especialidad = medico?.let {
         Repositorio.obtenerEspecialidad(it.especialidadId)
     }
+    val sede = cita?.let { Repositorio.obtenerSede(it.sedeId) } ?: medico?.let { Repositorio.obtenerSede(it.sedeId) }
 
     var mostrarDialogoCancelacion by remember {
         mutableStateOf(false)
@@ -98,13 +103,13 @@ fun DetalleCitaScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .padding(20.dp),
             verticalArrangement = Arrangement.Top
         ) {
             if (cita != null) {
 
                 Text(
-                    text = "Información de tu reserva",
+                    text = "Reserva Médica",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -112,125 +117,127 @@ fun DetalleCitaScreen(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Consulta los datos de tu atención médica.",
+                    text = "Consulta la información detallada de tu atención.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Médico
+                // APPOINTMENT PASS TICKET CARD
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = AzulClaroDetalle
+                        containerColor = Color.White
                     ),
                     elevation = CardDefaults.cardElevation(
-                        defaultElevation = 0.dp
+                        defaultElevation = 3.dp
                     )
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.padding(20.dp)
                     ) {
-                        val imagenMedico = obtenerImagenMedicoDetalle(
-                            medico?.id ?: 0
-                        )
-
-                        if (imagenMedico != null) {
-                            Image(
-                                painter = painterResource(imagenMedico),
-                                contentDescription = medico?.nombre,
-                                modifier = Modifier
-                                    .size(62.dp)
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.Crop
+                        // CABECERA MÉDICO
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val imagenMedico = obtenerImagenMedicoDetalle(
+                                medico?.id ?: 0
                             )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(62.dp)
-                                    .background(
-                                        Color.White,
-                                        CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
+
+                            if (imagenMedico != null) {
+                                Image(
+                                    painter = painterResource(imagenMedico),
+                                    contentDescription = medico?.nombre,
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(CircleShape)
+                                        .border(2.dp, AzulElectric, CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .background(AzulIce, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.MedicalServices,
+                                        contentDescription = null,
+                                        tint = AzulElectric,
+                                        modifier = Modifier.size(30.dp)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.size(14.dp))
+
+                            Column(
+                                modifier = Modifier.weight(1f)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.MedicalServices,
-                                    contentDescription = null,
-                                    tint = AzulDetalle,
-                                    modifier = Modifier.size(30.dp)
+                                Text(
+                                    text = medico?.nombre ?: "Médico no disponible",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                                Text(
+                                    text = especialidad?.nombre ?: "Especialidad no disponible",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = AzulElectric,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                                Text(
+                                    text = "CMP: ${medico?.cmp ?: "N/A"}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        HorizontalDivider(color = AzulIce, thickness = 1.5.dp)
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                        Column(
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                text = medico?.nombre
-                                    ?: "Médico no disponible",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
+                        ElementoDetalleVisual(
+                            icono = Icons.Filled.Place,
+                            titulo = "Sede de atención",
+                            valor = sede?.nombre ?: "SaludPlus San Isidro"
+                        )
 
-                            Spacer(modifier = Modifier.height(3.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                            Text(
-                                text = especialidad?.nombre
-                                    ?: "Especialidad no disponible",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = AzulDetalle,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                        ElementoDetalleVisual(
+                            icono = Icons.Filled.LocationOn,
+                            titulo = "Dirección de la sede",
+                            valor = sede?.direccion ?: "Av. Javier Prado Este 1230, San Isidro"
+                        )
 
-                            Spacer(modifier = Modifier.height(3.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                            Text(
-                                text = medico?.cmp ?: "CMP no disponible",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
+                        ElementoDetalleVisual(
+                            icono = Icons.Filled.Call,
+                            titulo = "Teléfono de contacto",
+                            valor = medico?.telefono ?: (sede?.telefono ?: "(01) 619-0001")
+                        )
 
-                Spacer(modifier = Modifier.height(18.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                Text(
-                    text = "Detalles de la cita",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = FondoDetalle
-                    ),
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 0.dp
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
                         ElementoDetalleVisual(
                             icono = Icons.Filled.CalendarMonth,
                             titulo = "Fecha",
                             valor = formatearFechaEspanol(cita.fecha)
                         )
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         ElementoDetalleVisual(
                             icono = Icons.Filled.AccessTime,
@@ -238,23 +245,7 @@ fun DetalleCitaScreen(
                             valor = cita.hora
                         )
 
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        ElementoDetalleVisual(
-                            icono = Icons.Filled.MedicalServices,
-                            titulo = "Modalidad",
-                            valor = "Presencial"
-                        )
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        ElementoDetalleVisual(
-                            icono = Icons.Filled.LocationOn,
-                            titulo = "Centro médico",
-                            valor = "Clínica SaludPlus"
-                        )
-
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         ElementoEstado(
                             estado = cita.estado
@@ -300,6 +291,7 @@ fun DetalleCitaScreen(
 
                         Text(
                             text = "Cancelar cita",
+                            style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -336,12 +328,14 @@ fun DetalleCitaScreen(
             title = {
                 Text(
                     text = "Cancelar cita",
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Text(
-                    text = "¿Estás seguro de que deseas cancelar esta cita? El horario volverá a estar disponible."
+                    text = "¿Estás seguro de que deseas cancelar esta cita? El horario volverá a estar disponible.",
+                    style = MaterialTheme.typography.bodyLarge
                 )
             },
             confirmButton = {
@@ -349,21 +343,20 @@ fun DetalleCitaScreen(
                     onClick = {
                         mostrarDialogoCancelacion = false
 
-                        val cancelada =
-                            Repositorio.cancelarCita(citaId)
+                        val cancelada = Repositorio.cancelarCita(citaId)
 
                         if (cancelada) {
                             mensajeError = ""
                             onCitaCancelada()
                         } else {
-                            mensajeError =
-                                "No se pudo cancelar la cita."
+                            mensajeError = "No se pudo cancelar la cita."
                         }
                     }
                 ) {
                     Text(
                         text = "Sí, cancelar",
                         color = RojoDetalle,
+                        style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -374,7 +367,10 @@ fun DetalleCitaScreen(
                         mostrarDialogoCancelacion = false
                     }
                 ) {
-                    Text("No")
+                    Text(
+                        text = "No",
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
         )
@@ -383,7 +379,7 @@ fun DetalleCitaScreen(
 
 @Composable
 private fun ElementoDetalleVisual(
-    icono: androidx.compose.ui.graphics.vector.ImageVector,
+    icono: ImageVector,
     titulo: String,
     valor: String
 ) {
@@ -393,18 +389,16 @@ private fun ElementoDetalleVisual(
     ) {
         Box(
             modifier = Modifier
-                .size(42.dp)
-                .background(
-                    color = AzulClaroDetalle,
-                    shape = CircleShape
-                ),
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(AzulIce),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icono,
                 contentDescription = null,
-                tint = AzulDetalle,
-                modifier = Modifier.size(21.dp)
+                tint = AzulElectric,
+                modifier = Modifier.size(19.dp)
             )
         }
 
@@ -415,7 +409,7 @@ private fun ElementoDetalleVisual(
         ) {
             Text(
                 text = titulo,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -439,17 +433,8 @@ private fun ElementoEstado(
         ignoreCase = true
     )
 
-    val color = if (cancelada) {
-        RojoDetalle
-    } else {
-        VerdeDetalle
-    }
-
-    val fondo = if (cancelada) {
-        RojoClaroDetalle
-    } else {
-        VerdeClaroDetalle
-    }
+    val color = if (cancelada) RojoDetalle else VerdeDetalle
+    val fondo = if (cancelada) RojoClaroDetalle else VerdeClaroDetalle
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -457,22 +442,16 @@ private fun ElementoEstado(
     ) {
         Box(
             modifier = Modifier
-                .size(42.dp)
-                .background(
-                    color = fondo,
-                    shape = CircleShape
-                ),
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(fondo),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = if (cancelada) {
-                    Icons.Filled.Close
-                } else {
-                    Icons.Filled.CheckCircle
-                },
+                imageVector = if (cancelada) Icons.Filled.Close else Icons.Filled.CheckCircle,
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.size(21.dp)
+                modifier = Modifier.size(19.dp)
             )
         }
 
@@ -480,8 +459,8 @@ private fun ElementoEstado(
 
         Column {
             Text(
-                text = "Estado",
-                style = MaterialTheme.typography.labelMedium,
+                text = "Estado de la reserva",
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 

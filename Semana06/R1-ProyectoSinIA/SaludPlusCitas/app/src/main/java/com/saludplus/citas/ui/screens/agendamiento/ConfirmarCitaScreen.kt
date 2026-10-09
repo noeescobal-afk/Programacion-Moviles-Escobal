@@ -2,6 +2,7 @@ package com.saludplus.citas.ui.screens.agendamiento
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,15 +20,22 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,9 +55,11 @@ import androidx.compose.ui.unit.dp
 import com.saludplus.citas.R
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
-import com.saludplus.citas.ui.components.BotonPrincipal
 import com.saludplus.citas.ui.components.formatearFechaEspanol
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
+
+private val AzulElectric = Color(0xFF246BFD)
+private val AzulIce = Color(0xFFEBF2FE)
 
 @Composable
 fun ConfirmarCitaScreen(
@@ -65,9 +75,13 @@ fun ConfirmarCitaScreen(
     val especialidad = medico?.let {
         Repositorio.obtenerEspecialidad(it.especialidadId)
     }
+    val sede = medico?.let {
+        Repositorio.obtenerSede(it.sedeId)
+    }
 
     var mensajeError by remember { mutableStateOf("") }
     var procesando by remember { mutableStateOf(false) }
+    var mostrarDialogoConfirmacion by remember { mutableStateOf(false) }
 
     val datosValidos =
         usuario != null &&
@@ -107,181 +121,173 @@ fun ConfirmarCitaScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
+            // INDICADOR DE PASOS / PROGRESO (Paso 3 activo)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(AzulIce, RoundedCornerShape(12.dp))
+                    .padding(vertical = 10.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "1. Médico ✓",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "2. Horario ✓",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "3. Confirmar ●",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = AzulElectric
+                )
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
 
             Text(
-                text = "Revisa los detalles de tu reserva",
-                style = MaterialTheme.typography.titleLarge,
+                text = if (usuario != null) "Todo listo, ${usuario.nombre.split(" ").first()}" else "Todo listo",
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Confirma que toda la información sea correcta antes de agendar.",
+                text = "Revisa tu credencial de reserva antes de confirmarla.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            if (medico != null) {
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFEAF1FF)
-                    ),
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 0.dp
-                    )
+            // APPOINTMENT PASS / CREDENCIAL DE RESERVA
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                ),
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 4.dp
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
                 ) {
-
+                    // SECCIÓN SUPERIOR: MÉDICO
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-
                         Image(
                             painter = painterResource(imagenMedico),
-                            contentDescription = "Foto de ${medico.nombre}",
+                            contentDescription = "Foto de ${medico?.nombre}",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .size(70.dp)
+                                .size(64.dp)
                                 .clip(CircleShape)
+                                .border(2.dp, AzulElectric, CircleShape)
                         )
 
                         Column(
                             modifier = Modifier.padding(start = 14.dp)
                         ) {
-
                             Text(
-                                text = medico.nombre,
+                                text = medico?.nombre ?: "Médico",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
 
-                            Spacer(modifier = Modifier.height(3.dp))
+                            Spacer(modifier = Modifier.height(2.dp))
 
                             Text(
-                                text = especialidad?.nombre ?: "Especialidad médica",
+                                text = especialidad?.nombre ?: "Especialidad",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
+                                color = AzulElectric,
+                                fontWeight = FontWeight.SemiBold
                             )
 
-                            Spacer(modifier = Modifier.height(3.dp))
+                            Spacer(modifier = Modifier.height(2.dp))
 
                             Text(
-                                text = "CMP: ${medico.cmp}",
+                                text = "CMP: ${medico?.cmp}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
-                }
-            }
 
-            Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(color = AzulIce, thickness = 1.5.dp)
+                    Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Resumen de tu cita",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFF5F7FB)
-                ),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 0.dp
-                )
-            ) {
-
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-
-                    ElementoResumenVisual(
+                    // SECCIÓN CENTRAL: FECHA, HORA, SEDE
+                    ElementoPassRow(
                         icono = Icons.Filled.Person,
                         titulo = "Paciente",
                         valor = usuario?.nombre ?: "No disponible"
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    ElementoResumenVisual(
+                    ElementoPassRow(
                         icono = Icons.Filled.CalendarMonth,
-                        titulo = "Fecha",
+                        titulo = "Fecha de la cita",
                         valor = formatearFechaEspanol(fecha)
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    ElementoResumenVisual(
+                    ElementoPassRow(
                         icono = Icons.Filled.AccessTime,
-                        titulo = "Hora",
+                        titulo = "Hora de la cita",
                         valor = hora
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    ElementoResumenVisual(
+                    ElementoPassRow(
+                        icono = Icons.Filled.Place,
+                        titulo = "Sede seleccionada",
+                        valor = sede?.nombre ?: "SaludPlus"
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ElementoPassRow(
+                        icono = Icons.Filled.LocationOn,
+                        titulo = "Dirección",
+                        valor = sede?.direccion ?: "Dirección SaludPlus"
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ElementoPassRow(
+                        icono = Icons.Filled.Call,
+                        titulo = "Teléfono de contacto",
+                        valor = medico?.telefono ?: "(01) 619-0001"
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ElementoPassRow(
                         icono = Icons.Filled.LocalHospital,
-                        titulo = "Modalidad",
+                        titulo = "Modalidad de atención",
                         valor = "Presencial"
                     )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    ElementoResumenVisual(
-                        icono = Icons.Filled.LocationOn,
-                        titulo = "Centro médico",
-                        valor = "Clínica SaludPlus"
-                    )
                 }
-            }
-
-            if (!datosValidos && mensajeError.isEmpty()) {
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                val detalleError = when {
-                    usuario == null ->
-                        "Debes iniciar sesión para agendar una cita."
-
-                    medico == null ->
-                        "El médico seleccionado no existe."
-
-                    especialidad == null ->
-                        "La especialidad asociada no fue encontrada."
-
-                    else ->
-                        "La fecha u hora seleccionadas no son válidas."
-                }
-
-                Text(
-                    text = detalleError,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
 
             if (mensajeError.isNotEmpty()) {
-
                 Spacer(modifier = Modifier.height(16.dp))
-
                 Text(
                     text = mensajeError,
                     color = MaterialTheme.colorScheme.error,
@@ -293,47 +299,103 @@ fun ConfirmarCitaScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            BotonPrincipal(
-                texto = if (procesando) {
-                    "Procesando..."
-                } else {
-                    "Confirmar cita"
+            Button(
+                onClick = {
+                    if (!datosValidos || procesando) return@Button
+                    mostrarDialogoConfirmacion = true
                 },
                 enabled = habilitado,
-                onClick = {
-                    val u = usuario ?: return@BotonPrincipal
-
-                    if (!datosValidos || procesando) {
-                        return@BotonPrincipal
-                    }
-
-                    procesando = true
-                    mensajeError = ""
-
-                    val citaCreada = Repositorio.agendarCita(
-                        usuarioId = u.id,
-                        medicoId = medicoId,
-                        fecha = fecha,
-                        hora = hora
-                    )
-
-                    if (citaCreada != null) {
-                        onCitaConfirmada(citaCreada.id)
-                    } else {
-                        procesando = false
-                        mensajeError =
-                            "No se pudo agendar la cita. El horario podría haber dejado de estar disponible."
-                    }
-                }
-            )
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AzulElectric,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = if (procesando) "Procesando..." else "Confirmar cita  →",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
         }
     }
+
+    // Diálogo M3 de confirmación
+    if (mostrarDialogoConfirmacion) {
+        AlertDialog(
+            onDismissRequest = {
+                mostrarDialogoConfirmacion = false
+            },
+            title = {
+                Text(
+                    text = "Confirmar cita",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "¿Deseas confirmar esta cita con ${medico?.nombre ?: "el médico"} para el ${formatearFechaEspanol(fecha)} a las $hora en ${sede?.nombre ?: "SaludPlus"}?",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        mostrarDialogoConfirmacion = false
+                        val u = usuario ?: return@TextButton
+                        val m = medico ?: return@TextButton
+
+                        procesando = true
+                        mensajeError = ""
+
+                        val citaCreada = Repositorio.agendarCita(
+                            usuarioId = u.id,
+                            medicoId = medicoId,
+                            fecha = fecha,
+                            hora = hora,
+                            sedeId = m.sedeId
+                        )
+
+                        if (citaCreada != null) {
+                            onCitaConfirmada(citaCreada.id)
+                        } else {
+                            procesando = false
+                            mensajeError = "No se pudo agendar la cita. El horario podría haber dejado de estar disponible."
+                        }
+                    }
+                ) {
+                    Text(
+                        text = "Confirmar",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = AzulElectric
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        mostrarDialogoConfirmacion = false
+                    }
+                ) {
+                    Text(
+                        text = "Cancelar",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+        )
+    }
 }
 
 @Composable
-private fun ElementoResumenVisual(
+private fun ElementoPassRow(
     icono: ImageVector,
     titulo: String,
     valor: String
@@ -342,34 +404,30 @@ private fun ElementoResumenVisual(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         Box(
             modifier = Modifier
-                .size(42.dp)
+                .size(38.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFE5EEFF)),
+                .background(AzulIce),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icono,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(21.dp)
+                tint = AzulElectric,
+                modifier = Modifier.size(19.dp)
             )
         }
 
         Column(
             modifier = Modifier.padding(start = 12.dp)
         ) {
-
             Text(
                 text = titulo,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
             Spacer(modifier = Modifier.height(2.dp))
-
             Text(
                 text = valor,
                 style = MaterialTheme.typography.bodyMedium,

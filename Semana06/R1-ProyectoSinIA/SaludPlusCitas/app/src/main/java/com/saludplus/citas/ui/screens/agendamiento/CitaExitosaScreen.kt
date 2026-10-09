@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -60,7 +61,8 @@ fun CitaExitosaScreen(
     citaId: Int,
     onVerMisCitas: () -> Unit,
     onIrInicio: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onVolverSedes: (() -> Unit)? = null
 ) {
     val cita = Repositorio.obtenerCita(citaId)
     val medico = cita?.let {
@@ -68,6 +70,11 @@ fun CitaExitosaScreen(
     }
     val especialidad = medico?.let {
         Repositorio.obtenerEspecialidad(it.especialidadId)
+    }
+    val sede = cita?.let {
+        Repositorio.obtenerSede(it.sedeId)
+    } ?: medico?.let {
+        Repositorio.obtenerSede(it.sedeId)
     }
 
     Scaffold(
@@ -237,6 +244,14 @@ fun CitaExitosaScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         DatoCitaExitosa(
+                            icono = Icons.Filled.Place,
+                            titulo = "Sede",
+                            valor = sede?.nombre ?: "SaludPlus San Isidro"
+                        )
+
+                        Spacer(modifier = Modifier.height(14.dp))
+
+                        DatoCitaExitosa(
                             icono = Icons.Filled.CalendarMonth,
                             titulo = "Fecha",
                             valor = formatearFechaEspanol(cita.fecha)
@@ -325,7 +340,7 @@ fun CitaExitosaScreen(
                     Spacer(modifier = Modifier.size(8.dp))
 
                     Text(
-                        text = "Ver mis citas",
+                        text = "Ver agenda",
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -333,7 +348,13 @@ fun CitaExitosaScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 TextButton(
-                    onClick = onIrInicio
+                    onClick = {
+                        if (onVolverSedes != null) {
+                            onVolverSedes()
+                        } else {
+                            onIrInicio()
+                        }
+                    }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Home,
@@ -345,7 +366,7 @@ fun CitaExitosaScreen(
                     Spacer(modifier = Modifier.size(7.dp))
 
                     Text(
-                        text = "Ir al inicio",
+                        text = "Volver a Sedes",
                         color = AzulExito,
                         fontWeight = FontWeight.SemiBold
                     )

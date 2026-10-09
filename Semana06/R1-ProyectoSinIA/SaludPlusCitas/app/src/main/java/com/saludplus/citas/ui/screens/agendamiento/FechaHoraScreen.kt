@@ -2,6 +2,7 @@ package com.saludplus.citas.ui.screens.agendamiento
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +22,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -49,13 +54,15 @@ import androidx.compose.ui.unit.sp
 import com.saludplus.citas.R
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
-import com.saludplus.citas.ui.components.BotonPrincipal
 import com.saludplus.citas.ui.components.MensajeListaVacia
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+
+private val AzulElectric = Color(0xFF246BFD)
+private val AzulIce = Color(0xFFEBF2FE)
 
 @Composable
 fun FechaHoraScreen(
@@ -67,6 +74,9 @@ fun FechaHoraScreen(
     val medico = Repositorio.obtenerMedico(medicoId)
     val especialidad = medico?.let {
         Repositorio.obtenerEspecialidad(it.especialidadId)
+    }
+    val sede = medico?.let {
+        Repositorio.obtenerSede(it.sedeId)
     }
 
     val localeEs = remember { Locale.forLanguageTag("es-ES") }
@@ -161,7 +171,7 @@ fun FechaHoraScreen(
     Scaffold(
         topBar = {
             BarraSuperior(
-                titulo = "Fecha y hora",
+                titulo = "Reservar cita",
                 onVolverAtras = onVolverAtras
             )
         },
@@ -172,84 +182,146 @@ fun FechaHoraScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(horizontal = 20.dp, vertical = 12.dp)
         ) {
+            // INDICADOR DE PASOS / PROGRESO (Paso 2 activo)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(AzulIce, RoundedCornerShape(12.dp))
+                    .padding(vertical = 10.dp, horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "1. Médico ✓",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "2. Horario ●",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = AzulElectric
+                )
+                Text(
+                    text = "3. Confirmar",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // PERFIL RESUMIDO DEL MÉDICO
             if (medico != null) {
-
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFEAF1FF)
+                        containerColor = Color.White
                     ),
                     elevation = CardDefaults.cardElevation(
-                        defaultElevation = 0.dp
+                        defaultElevation = 2.dp
                     )
                 ) {
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.padding(14.dp)
                     ) {
-
-                        Image(
-                            painter = painterResource(imagenMedico),
-                            contentDescription = "Foto de ${medico.nombre}",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(70.dp)
-                                .clip(CircleShape)
-                        )
-
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 14.dp)
-                                .weight(1f)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-
-                            Text(
-                                text = medico.nombre,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                            Image(
+                                painter = painterResource(imagenMedico),
+                                contentDescription = "Foto de ${medico.nombre}",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .clip(CircleShape)
+                                    .border(2.dp, AzulElectric, CircleShape)
                             )
 
-                            Spacer(modifier = Modifier.height(3.dp))
+                            Column(
+                                modifier = Modifier
+                                    .padding(start = 14.dp)
+                                    .weight(1f)
+                            ) {
+                                Text(
+                                    text = medico.nombre,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
 
-                            Text(
-                                text = especialidad?.nombre ?: "Especialidad médica",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
-                            )
+                                Spacer(modifier = Modifier.height(2.dp))
 
-                            Spacer(modifier = Modifier.height(3.dp))
+                                Text(
+                                    text = especialidad?.nombre ?: "Especialidad médica",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = AzulElectric,
+                                    fontWeight = FontWeight.SemiBold
+                                )
 
-                            Text(
-                                text = "CMP: ${medico.cmp}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                                Text(
+                                    text = "CMP: ${medico.cmp}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        if (sede != null) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Place,
+                                        contentDescription = null,
+                                        tint = AzulElectric,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = sede.nombre,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Call,
+                                        contentDescription = null,
+                                        tint = AzulElectric,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Text(
+                                        text = medico.telefono,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
                         }
                     }
                 }
-
-            } else {
-
-                Text(
-                    text = "Médico no encontrado",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.error
-                )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             Text(
-                text = "Selecciona una fecha",
+                text = "Elige el día",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -261,7 +333,6 @@ fun FechaHoraScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 IconButton(
                     onClick = {
                         if (bloqueOffset > 0) {
@@ -276,13 +347,7 @@ fun FechaHoraScreen(
                         text = "‹",
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (bloqueOffset > 0) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = 0.25f
-                            )
-                        }
+                        color = if (bloqueOffset > 0) AzulElectric else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
                     )
                 }
 
@@ -303,22 +368,20 @@ fun FechaHoraScreen(
                         text = "›",
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = AzulElectric
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // CÁPSULAS DÍAS HABILESS
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-
                 items(diasHabiles) { dia ->
-
                     val esSeleccionada = dia == fechaSeleccionada
-
                     val diaNombre = dia
                         .format(diaNombreFormatter)
                         .replace(".", "")
@@ -330,78 +393,60 @@ fun FechaHoraScreen(
                                 fechaSeleccionada = dia
                                 horaSeleccionada = null
                             },
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(18.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (esSeleccionada) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                Color(0xFFF1F5FB)
-                            }
+                            containerColor = if (esSeleccionada) AzulElectric else Color.White
                         ),
                         elevation = CardDefaults.cardElevation(
-                            defaultElevation = 0.dp
+                            defaultElevation = if (esSeleccionada) 4.dp else 1.dp
                         )
                     ) {
-
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.padding(
-                                horizontal = 16.dp,
-                                vertical = 12.dp
-                            )
+                            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp)
                         ) {
-
                             Text(
                                 text = diaNombre,
                                 style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium,
-                                color = if (esSeleccionada) {
-                                    MaterialTheme.colorScheme.onPrimary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                }
+                                fontWeight = FontWeight.Bold,
+                                color = if (esSeleccionada) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
-                            Spacer(modifier = Modifier.height(3.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             Text(
                                 text = dia.dayOfMonth.toString(),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = if (esSeleccionada) {
-                                    MaterialTheme.colorScheme.onPrimary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurface
-                                }
+                                color = if (esSeleccionada) Color.White else MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Box(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFEAF1FF)),
+                        .background(AzulIce),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Schedule,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = AzulElectric,
                         modifier = Modifier.size(20.dp)
                     )
                 }
 
                 Text(
-                    text = "Horarios disponibles",
+                    text = "Elige una hora",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(start = 10.dp)
@@ -413,14 +458,12 @@ fun FechaHoraScreen(
             val fechaActualLocalDate = fechaSeleccionada
 
             if (fechaActualLocalDate == null) {
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-
                     Text(
                         text = "Selecciona una fecha para ver los horarios disponibles",
                         style = MaterialTheme.typography.bodyMedium,
@@ -428,34 +471,23 @@ fun FechaHoraScreen(
                         textAlign = TextAlign.Center
                     )
                 }
-
             } else {
-
-                val fechaRepoString =
-                    fechaActualLocalDate.format(repoDateFormatter)
-
-                val horariosDisponibles =
-                    Repositorio.horariosDisponibles(
-                        medicoId = medicoId,
-                        fecha = fechaRepoString
-                    )
+                val fechaRepoString = fechaActualLocalDate.format(repoDateFormatter)
+                val horariosDisponibles = Repositorio.horariosDisponibles(
+                    medicoId = medicoId,
+                    fecha = fechaRepoString
+                )
 
                 if (horariosDisponibles.isEmpty()) {
-
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f),
                         contentAlignment = Alignment.Center
                     ) {
-
-                        MensajeListaVacia(
-                            mensaje = "No hay horarios disponibles para esta fecha"
-                        )
+                        MensajeListaVacia(mensaje = "No hay horarios disponibles para esta fecha")
                     }
-
                 } else {
-
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -464,49 +496,32 @@ fun FechaHoraScreen(
                             .fillMaxWidth()
                             .weight(1f)
                     ) {
-
                         items(horariosDisponibles) { hora ->
-
-                            val esHoraSeleccionada =
-                                hora == horaSeleccionada
+                            val esHoraSeleccionada = hora == horaSeleccionada
 
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable {
-                                        horaSeleccionada = hora
-                                    },
+                                    .clickable { horaSeleccionada = hora },
                                 shape = RoundedCornerShape(14.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor =
-                                        if (esHoraSeleccionada) {
-                                            MaterialTheme.colorScheme.primary
-                                        } else {
-                                            Color(0xFFF1F5FB)
-                                        }
+                                    containerColor = if (esHoraSeleccionada) AzulElectric else Color.White
                                 ),
                                 elevation = CardDefaults.cardElevation(
-                                    defaultElevation = 0.dp
+                                    defaultElevation = if (esHoraSeleccionada) 3.dp else 1.dp
                                 )
                             ) {
-
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 13.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
-
                                     Text(
                                         text = hora,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color =
-                                            if (esHoraSeleccionada) {
-                                                MaterialTheme.colorScheme.onPrimary
-                                            } else {
-                                                MaterialTheme.colorScheme.onSurface
-                                            }
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (esHoraSeleccionada) Color.White else MaterialTheme.colorScheme.onSurface
                                     )
                                 }
                             }
@@ -517,30 +532,33 @@ fun FechaHoraScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            val habilitado =
-                fechaSeleccionada != null &&
-                        horaSeleccionada != null
+            val habilitado = fechaSeleccionada != null && horaSeleccionada != null
 
-            BotonPrincipal(
-                texto = "Continuar",
-                enabled = habilitado,
+            Button(
                 onClick = {
-
                     val f = fechaSeleccionada
                     val h = horaSeleccionada
-
                     if (f != null && h != null) {
-
-                        val fechaFormatted =
-                            f.format(repoDateFormatter)
-
-                        onContinuar(
-                            fechaFormatted,
-                            h
-                        )
+                        val fechaFormatted = f.format(repoDateFormatter)
+                        onContinuar(fechaFormatted, h)
                     }
-                }
-            )
+                },
+                enabled = habilitado,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AzulElectric,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "Continuar  →",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

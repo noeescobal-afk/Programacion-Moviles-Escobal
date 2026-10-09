@@ -10,6 +10,8 @@ object Rutas {
     const val TERMINOS = "terminos"
 
     const val INICIO = "inicio"
+    const val SEDES = "sedes"
+    const val DOCTORES = "doctores"
     const val ESPECIALIDADES = "especialidades"
 
     const val MIS_CITAS = "mis_citas"
@@ -17,11 +19,16 @@ object Rutas {
     const val RESULTADOS = "resultados"
     const val NOTIFICACIONES = "notificaciones"
 
+    const val MEDICOS_SEDE = "medicos_sede/{sedeId}"
     const val MEDICOS = "medicos/{especialidadId}"
     const val FECHA_HORA = "fecha_hora/{medicoId}"
     const val CONFIRMAR_CITA = "confirmar_cita/{medicoId}/{fecha}/{hora}"
     const val CITA_EXITOSA = "cita_exitosa/{citaId}"
     const val DETALLE_CITA = "detalle_cita/{citaId}"
+
+    fun medicosSede(sedeId: Int): String {
+        return "medicos_sede/$sedeId"
+    }
 
     fun medicos(especialidadId: Int): String {
         return "medicos/$especialidadId"

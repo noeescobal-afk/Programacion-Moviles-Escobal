@@ -18,27 +18,26 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.EventAvailable
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.saludplus.citas.R
 import com.saludplus.citas.data.model.Cita
 import com.saludplus.citas.data.repository.Repositorio
+import com.saludplus.citas.ui.components.SaludPlusBottomBar
 import com.saludplus.citas.ui.components.formatearFechaEspanol
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
 
@@ -70,9 +70,13 @@ fun MisCitasScreen(
     onCitaSeleccionada: (Int) -> Unit,
     onAgendarCita: () -> Unit,
     onInicio: () -> Unit,
+    onSedes: () -> Unit,
+    onDoctores: () -> Unit,
     onResultados: () -> Unit,
     onPerfil: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onVolverAtras: (() -> Unit)? = null,
+    onAbrirMenu: (() -> Unit)? = null
 ) {
     val usuario = Repositorio.usuarioActual
 
@@ -87,61 +91,39 @@ fun MisCitasScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Mis citas",
+                        text = "Agenda",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
+                },
+                navigationIcon = {
+                    if (onVolverAtras != null) {
+                        IconButton(onClick = onVolverAtras) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Volver atrás"
+                            )
+                        }
+                    } else if (onAbrirMenu != null) {
+                        IconButton(onClick = onAbrirMenu) {
+                            Icon(
+                                imageVector = Icons.Filled.Menu,
+                                contentDescription = "Abrir menú"
+                            )
+                        }
+                    }
                 }
             )
         },
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onInicio,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Home,
-                            contentDescription = "Inicio"
-                        )
-                    },
-                    label = { Text("Inicio") }
-                )
-
-                NavigationBarItem(
-                    selected = true,
-                    onClick = {},
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.CalendarMonth,
-                            contentDescription = "Mis citas"
-                        )
-                    },
-                    label = { Text("Mis citas") }
-                )
-
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onResultados,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Assignment,
-                            contentDescription = "Resultados"
-                        )
-                    },
-                    label = { Text("Resultados") }
-                )
-
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onPerfil,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = "Perfil"
-                        )
-                    },
-                    label = { Text("Perfil") }
+            if (onVolverAtras == null) {
+                SaludPlusBottomBar(
+                    rutaActual = "agenda",
+                    onNavegarInicio = onInicio,
+                    onNavegarSedes = onSedes,
+                    onNavegarDoctores = onDoctores,
+                    onNavegarResultados = onResultados,
+                    onNavegarPerfil = onPerfil
                 )
             }
         },
@@ -220,6 +202,7 @@ fun MisCitasScreen(
 
                     Text(
                         text = "Agendar nueva cita",
+                        style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -239,6 +222,10 @@ private fun TarjetaCita(
 
     val especialidad = medico?.let {
         Repositorio.obtenerEspecialidad(it.especialidadId)
+    }
+
+    val sede = Repositorio.obtenerSede(cita.sedeId) ?: medico?.let {
+        Repositorio.obtenerSede(it.sedeId)
     }
 
     val cancelada = cita.estado.equals(
@@ -336,7 +323,30 @@ private fun TarjetaCita(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
+
+            if (sede != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Place,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    Text(
+                        text = sede.nombre,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -357,7 +367,7 @@ private fun TarjetaCita(
                 )
             }
 
-            Spacer(modifier = Modifier.height(9.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -466,12 +476,12 @@ private fun EstadoCitasVacio(
 
             Text(
                 text = "Agendar cita",
+                style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
             )
         }
     }
 }
-
 
 private fun obtenerImagenMedicoCita(medicoId: Int): Int? {
     return when (medicoId) {
@@ -497,6 +507,8 @@ fun MisCitasScreenPreview() {
             onCitaSeleccionada = {},
             onAgendarCita = {},
             onInicio = {},
+            onSedes = {},
+            onDoctores = {},
             onResultados = {},
             onPerfil = {}
         )

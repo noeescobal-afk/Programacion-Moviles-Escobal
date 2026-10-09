@@ -20,26 +20,22 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChildCare
-import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.HealthAndSafety
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -55,72 +51,35 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.saludplus.citas.data.repository.Repositorio
+import com.saludplus.citas.ui.components.SaludPlusBottomBar
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
 
 @Composable
 fun HomeScreen(
     onAgendarCita: () -> Unit,
+    onSedes: () -> Unit,
+    onDoctores: () -> Unit,
     onEspecialidadSeleccionada: (Int) -> Unit,
     onMisCitas: () -> Unit,
     onResultados: () -> Unit,
     onPerfil: () -> Unit,
     onNotificaciones: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAbrirMenu: (() -> Unit)? = null
 ) {
     val usuario = Repositorio.usuarioActual
     val especialidades = Repositorio.especialidadesDestacadas()
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = true,
-                    onClick = {},
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Home,
-                            contentDescription = "Inicio"
-                        )
-                    },
-                    label = { Text("Inicio") }
-                )
-
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onMisCitas,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.CalendarMonth,
-                            contentDescription = "Citas"
-                        )
-                    },
-                    label = { Text("Citas") }
-                )
-
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onResultados,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Assignment,
-                            contentDescription = "Resultados"
-                        )
-                    },
-                    label = { Text("Resultados") }
-                )
-
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onPerfil,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = "Perfil"
-                        )
-                    },
-                    label = { Text("Perfil") }
-                )
-            }
+            SaludPlusBottomBar(
+                rutaActual = "inicio",
+                onNavegarInicio = {},
+                onNavegarSedes = onSedes,
+                onNavegarDoctores = onDoctores,
+                onNavegarResultados = onResultados,
+                onNavegarPerfil = onPerfil
+            )
         },
         modifier = modifier
     ) { innerPadding ->
@@ -139,26 +98,40 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier.weight(1f)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = if (usuario != null) {
-                            "¡Hola, ${usuario.nombre}!"
-                        } else {
-                            "¡Hola!"
-                        },
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (onAbrirMenu != null) {
+                        IconButton(
+                            onClick = onAbrirMenu,
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Menu,
+                                contentDescription = "Menú lateral"
+                            )
+                        }
+                    }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Column {
+                        Text(
+                            text = if (usuario != null) {
+                                "¡Hola, ${usuario.nombre}!"
+                            } else {
+                                "¡Hola!"
+                            },
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
 
-                    Text(
-                        text = "¿Qué deseas hacer hoy?",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        Text(
+                            text = "¿Qué deseas hacer hoy?",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 IconButton(
@@ -177,20 +150,19 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Acciones principales
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-
-                // Agendar cita
+                // Sedes
                 Card(
                     modifier = Modifier
                         .weight(1f)
-                        .height(150.dp)
-                        .clickable { onAgendarCita() },
+                        .height(140.dp)
+                        .clickable { onSedes() },
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -199,38 +171,36 @@ fun HomeScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp),
+                            .padding(12.dp),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(52.dp)
+                                .size(46.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.primary),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.CalendarMonth,
-                                contentDescription = "Agendar cita",
+                                imageVector = Icons.Filled.Place,
+                                contentDescription = "Sedes",
                                 tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         Text(
-                            text = "Agendar cita",
+                            text = "Sedes",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
 
-                        Spacer(modifier = Modifier.height(3.dp))
-
                         Text(
-                            text = "Reserva una atención",
+                            text = "Agendar cita",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
@@ -238,11 +208,62 @@ fun HomeScreen(
                     }
                 }
 
-                // Mis citas
+                // Doctores
                 Card(
                     modifier = Modifier
                         .weight(1f)
-                        .height(150.dp)
+                        .height(140.dp)
+                        .clickable { onDoctores() },
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFEAF1FF)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(46.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF246BFD)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.MedicalServices,
+                                contentDescription = "Doctores",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = "Doctores",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Text(
+                            text = "Staff médico",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                // Agenda
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(140.dp)
                         .clickable { onMisCitas() },
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
@@ -252,38 +273,36 @@ fun HomeScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp),
+                            .padding(12.dp),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(52.dp)
+                                .size(46.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.secondary),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.EventAvailable,
-                                contentDescription = "Mis citas",
+                                imageVector = Icons.Filled.CalendarMonth,
+                                contentDescription = "Agenda",
                                 tint = MaterialTheme.colorScheme.onSecondary,
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         Text(
-                            text = "Mis citas",
+                            text = "Agenda",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
 
-                        Spacer(modifier = Modifier.height(3.dp))
-
                         Text(
-                            text = "Revisa tus reservas",
+                            text = "Mis reservas",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
@@ -292,7 +311,7 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             // Especialidades destacadas
             Row(
@@ -306,8 +325,8 @@ fun HomeScreen(
                     fontWeight = FontWeight.Bold
                 )
 
-                TextButton(onClick = onAgendarCita) {
-                    Text("Ver todas")
+                TextButton(onClick = onSedes) {
+                    Text("Ver sedes")
                 }
             }
 
@@ -371,7 +390,7 @@ fun HomeScreen(
                             .width(155.dp)
                             .height(170.dp)
                             .clickable {
-                                onEspecialidadSeleccionada(especialidad.id)
+                                onSedes()
                             },
                         shape = RoundedCornerShape(18.dp),
                         colors = CardDefaults.cardColors(
@@ -437,6 +456,8 @@ fun HomeScreenPreview() {
     SaludPlusCitasTheme {
         HomeScreen(
             onAgendarCita = {},
+            onSedes = {},
+            onDoctores = {},
             onEspecialidadSeleccionada = {},
             onMisCitas = {},
             onResultados = {},

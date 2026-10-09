@@ -16,19 +16,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -39,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.saludplus.citas.ui.components.SaludPlusBottomBar
 import com.saludplus.citas.ui.components.formatearFechaEspanol
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
 
@@ -80,9 +78,11 @@ private val FondoResultado = Color(0xFFF5F7FB)
 @Composable
 fun ResultadosScreen(
     onInicio: () -> Unit,
-    onMisCitas: () -> Unit,
+    onSedes: () -> Unit,
+    onDoctores: () -> Unit,
     onPerfil: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onAbrirMenu: (() -> Unit)? = null
 ) {
     Scaffold(
         topBar = {
@@ -93,59 +93,28 @@ fun ResultadosScreen(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
+                },
+                navigationIcon = {
+                    if (onAbrirMenu != null) {
+                        IconButton(onClick = onAbrirMenu) {
+                            Icon(
+                                imageVector = Icons.Filled.Menu,
+                                contentDescription = "Abrir menú"
+                            )
+                        }
+                    }
                 }
             )
         },
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onInicio,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Home,
-                            contentDescription = "Inicio"
-                        )
-                    },
-                    label = { Text("Inicio") }
-                )
-
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onMisCitas,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.CalendarMonth,
-                            contentDescription = "Mis citas"
-                        )
-                    },
-                    label = { Text("Mis citas") }
-                )
-
-                NavigationBarItem(
-                    selected = true,
-                    onClick = {},
-                    icon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Assignment,
-                            contentDescription = "Resultados"
-                        )
-                    },
-                    label = { Text("Resultados") }
-                )
-
-                NavigationBarItem(
-                    selected = false,
-                    onClick = onPerfil,
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Person,
-                            contentDescription = "Perfil"
-                        )
-                    },
-                    label = { Text("Perfil") }
-                )
-            }
+            SaludPlusBottomBar(
+                rutaActual = "resultados",
+                onNavegarInicio = onInicio,
+                onNavegarSedes = onSedes,
+                onNavegarDoctores = onDoctores,
+                onNavegarResultados = {},
+                onNavegarPerfil = onPerfil
+            )
         },
         modifier = modifier
     ) { innerPadding ->
@@ -377,7 +346,8 @@ fun ResultadosScreenPreview() {
     SaludPlusCitasTheme {
         ResultadosScreen(
             onInicio = {},
-            onMisCitas = {},
+            onSedes = {},
+            onDoctores = {},
             onPerfil = {}
         )
     }
