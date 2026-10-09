@@ -1,5 +1,8 @@
+
 package com.saludplus.citas.ui.screens.perfil
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -25,11 +31,15 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.saludplus.citas.R
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
 
@@ -43,7 +53,11 @@ fun PerfilScreen(
     modifier: Modifier = Modifier
 ) {
     val usuario = Repositorio.usuarioActual
-    val citas = if (usuario != null) Repositorio.citasDelUsuario(usuario.id) else emptyList()
+    val citas = if (usuario != null) {
+        Repositorio.citasDelUsuario(usuario.id)
+    } else {
+        emptyList()
+    }
 
     Scaffold(
         topBar = {
@@ -62,39 +76,42 @@ fun PerfilScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onInicio,
-                    icon = { Text(text = "🏠", fontSize = 20.sp) },
+                    icon = { Text("⌂", fontSize = 23.sp) },
                     label = { Text("Inicio") }
                 )
+
                 NavigationBarItem(
                     selected = false,
                     onClick = onMisCitas,
-                    icon = { Text(text = "📅", fontSize = 20.sp) },
+                    icon = { Text("▦", fontSize = 22.sp) },
                     label = { Text("Mis citas") }
                 )
+
                 NavigationBarItem(
                     selected = false,
                     onClick = onResultados,
-                    icon = { Text(text = "📋", fontSize = 20.sp) },
+                    icon = { Text("▤", fontSize = 22.sp) },
                     label = { Text("Resultados") }
                 )
+
                 NavigationBarItem(
                     selected = true,
-                    onClick = { },
-                    icon = { Text(text = "👤", fontSize = 20.sp) },
+                    onClick = {},
+                    icon = { Text("●", fontSize = 20.sp) },
                     label = { Text("Perfil") }
                 )
             }
         },
         modifier = modifier
     ) { innerPadding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (usuario == null) {
                 Box(
@@ -111,45 +128,75 @@ fun PerfilScreen(
                     )
                 }
             } else {
-                Spacer(modifier = Modifier.height(12.dp))
 
-                // Avatar
-                Text(
-                    text = "👤",
-                    fontSize = 64.sp,
-                    textAlign = TextAlign.Center
+                // Fotografía personal del paciente
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Image(
+                    painter = painterResource(
+                        id = R.drawable.perfil_usuario
+                    ),
+                    contentDescription = "Fotografía de perfil de ${usuario.nombre}",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(124.dp)
+                        .clip(CircleShape)
+                        .border(
+                            width = 3.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = CircleShape
+                        )
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Tarjeta con Datos Personales
+                Text(
+                    text = usuario.nombre,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Paciente de SaludPlus",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                // Información personal
                 Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                        containerColor =
+                            MaterialTheme.colorScheme.surfaceVariant
+                    )
                 ) {
                     Column(
                         modifier = Modifier.padding(20.dp)
                     ) {
                         Text(
-                            text = "Información del paciente",
+                            text = "Información personal",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         FilaPerfil(
-                            etiqueta = "Nombre:",
+                            etiqueta = "Nombre completo",
                             valor = usuario.nombre
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         FilaPerfil(
-                            etiqueta = "Correo electrónico:",
+                            etiqueta = "Correo electrónico",
                             valor = usuario.correo
                         )
                     }
@@ -157,15 +204,19 @@ fun PerfilScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Tarjeta Resumen de Citas Registradas
+                // Resumen de actividad
                 Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                        containerColor =
+                            MaterialTheme.colorScheme.surfaceVariant
+                    )
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
                     ) {
                         Text(
                             text = "Resumen de actividad",
@@ -174,30 +225,51 @@ fun PerfilScreen(
                             color = MaterialTheme.colorScheme.primary
                         )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                        FilaPerfil(
-                            etiqueta = "Citas registradas:",
-                            valor = "${citas.size}"
+                        Text(
+                            text = "Citas registradas",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(
+                            text = "${citas.size}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        Text(
+                            text = if (citas.size == 1) {
+                                "cita en tu historial"
+                            } else {
+                                "citas en tu historial"
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(28.dp))
 
-                // Botón Cerrar Sesión
+                // Cerrar sesión
                 Button(
                     onClick = {
                         Repositorio.cerrarSesion()
                         onCerrarSesion()
                     },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error,
                         contentColor = MaterialTheme.colorScheme.onError
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
+                    )
                 ) {
                     Text(
                         text = "Cerrar sesión",
@@ -205,6 +277,8 @@ fun PerfilScreen(
                         fontWeight = FontWeight.Bold
                     )
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
@@ -215,21 +289,22 @@ private fun FilaPerfil(
     etiqueta: String,
     valor: String
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             text = etiqueta,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
         Text(
             text = valor,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.End
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

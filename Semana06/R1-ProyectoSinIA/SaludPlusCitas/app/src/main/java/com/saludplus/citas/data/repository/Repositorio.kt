@@ -1,3 +1,4 @@
+
 package com.saludplus.citas.data.repository
 
 import com.saludplus.citas.data.model.Cita
@@ -7,7 +8,15 @@ import com.saludplus.citas.data.model.Usuario
 
 object Repositorio {
 
-    private val usuarios = mutableListOf<Usuario>()
+    // Usuario de prueba precargado
+    private val usuarios = mutableListOf(
+        Usuario(
+            id = 1,
+            nombre = "Noe Escobal",
+            correo = "Noe.escobal@tecsup.edu.pe",
+            password = "123456"
+        )
+    )
 
     private val especialidades = listOf(
         Especialidad(1, "Medicina General", "Atención médica primaria y preventiva para la salud integral."),
@@ -35,7 +44,8 @@ object Repositorio {
     private val citas = mutableListOf<Cita>()
 
     private val horariosBase = listOf(
-        "08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"
+        "08:00", "09:00", "10:00", "11:00",
+        "14:00", "15:00", "16:00", "17:00"
     )
 
     private var _usuarioActual: Usuario? = null
@@ -47,17 +57,29 @@ object Repositorio {
         return usuarios.toList()
     }
 
-    fun registrarUsuario(nombre: String, correo: String, password: String): Boolean {
-        if (nombre.isBlank() || correo.isBlank() || password.isBlank()) {
+    fun registrarUsuario(
+        nombre: String,
+        correo: String,
+        password: String
+    ): Boolean {
+        if (
+            nombre.isBlank() ||
+            correo.isBlank() ||
+            password.isBlank()
+        ) {
             return false
         }
 
-        val existeCorreo = usuarios.any { it.correo.equals(correo.trim(), ignoreCase = true) }
+        val existeCorreo = usuarios.any {
+            it.correo.equals(correo.trim(), ignoreCase = true)
+        }
+
         if (existeCorreo) {
             return false
         }
 
         val nuevoId = (usuarios.maxOfOrNull { it.id } ?: 0) + 1
+
         val nuevoUsuario = Usuario(
             id = nuevoId,
             nombre = nombre.trim(),
@@ -67,6 +89,7 @@ object Repositorio {
 
         usuarios.add(nuevoUsuario)
         _usuarioActual = nuevoUsuario
+
         return true
     }
 
@@ -76,7 +99,8 @@ object Repositorio {
         }
 
         val usuarioEncontrado = usuarios.find {
-            it.correo.equals(correo.trim(), ignoreCase = true) && it.password == password
+            it.correo.equals(correo.trim(), ignoreCase = true) &&
+                    it.password == password
         }
 
         if (usuarioEncontrado != null) {
@@ -95,6 +119,7 @@ object Repositorio {
         if (texto.isBlank()) {
             return especialidades.toList()
         }
+
         return especialidades.filter {
             it.nombre.contains(texto.trim(), ignoreCase = true)
         }
@@ -118,19 +143,35 @@ object Repositorio {
             .sortedByDescending { it.nombre }
     }
 
-    fun buscarMedicos(especialidadId: Int, texto: String): List<Medico> {
-        val medicosEspecialidad = medicos.filter { it.especialidadId == especialidadId }
+    fun buscarMedicos(
+        especialidadId: Int,
+        texto: String
+    ): List<Medico> {
+        val medicosEspecialidad = medicos.filter {
+            it.especialidadId == especialidadId
+        }
+
         if (texto.isBlank()) {
             return medicosEspecialidad.sortedBy { it.nombre }
         }
+
         return medicosEspecialidad
-            .filter { it.nombre.contains(texto.trim(), ignoreCase = true) }
+            .filter {
+                it.nombre.contains(texto.trim(), ignoreCase = true)
+            }
             .sortedBy { it.nombre }
     }
 
-    fun horariosDisponibles(medicoId: Int, fecha: String): List<String> {
+    fun horariosDisponibles(
+        medicoId: Int,
+        fecha: String
+    ): List<String> {
         val horasOcupadas = citas
-            .filter { it.medicoId == medicoId && it.fecha == fecha && it.estado != "Cancelada" }
+            .filter {
+                it.medicoId == medicoId &&
+                        it.fecha == fecha &&
+                        it.estado != "Cancelada"
+            }
             .map { it.hora }
 
         return horariosBase.filter { it !in horasOcupadas }
@@ -142,22 +183,30 @@ object Repositorio {
         fecha: String,
         hora: String
     ): Cita? {
-        if (usuarioId <= 0 || medicoId <= 0 || fecha.isBlank() || hora.isBlank()) {
+        if (
+            usuarioId <= 0 ||
+            medicoId <= 0 ||
+            fecha.isBlank() ||
+            hora.isBlank()
+        ) {
             return null
         }
 
         val existeUsuario = usuarios.any { it.id == usuarioId }
         val existeMedico = medicos.any { it.id == medicoId }
+
         if (!existeUsuario || !existeMedico) {
             return null
         }
 
         val disponibles = horariosDisponibles(medicoId, fecha)
+
         if (hora !in disponibles) {
             return null
         }
 
         val nuevoId = (citas.maxOfOrNull { it.id } ?: 0) + 1
+
         val nuevaCita = Cita(
             id = nuevoId,
             usuarioId = usuarioId,
@@ -168,6 +217,7 @@ object Repositorio {
         )
 
         citas.add(nuevaCita)
+
         return nuevaCita
     }
 
@@ -178,13 +228,20 @@ object Repositorio {
     fun citasDelUsuario(usuarioId: Int): List<Cita> {
         return citas
             .filter { it.usuarioId == usuarioId }
-            .sortedWith(compareBy<Cita> { it.fecha }.thenBy { it.hora })
+            .sortedWith(
+                compareBy<Cita> { it.fecha }
+                    .thenBy { it.hora }
+            )
     }
 
     fun cancelarCita(citaId: Int): Boolean {
-        val citaExistente = citas.find { it.id == citaId } ?: return false
+        val citaExistente = citas.find {
+            it.id == citaId
+        } ?: return false
+
         citas.remove(citaExistente)
         citas.add(citaExistente.copy(estado = "Cancelada"))
+
         return true
     }
 
