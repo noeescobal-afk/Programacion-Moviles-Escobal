@@ -1,5 +1,6 @@
 package com.saludplus.citas.ui.screens.auth
 
+import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -46,74 +47,277 @@ fun RegistroScreen(
     var mensajeError by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = { BarraSuperior(titulo = "Crear cuenta", onVolverAtras = onVolverAtras) },
+        topBar = {
+            BarraSuperior(
+                titulo = "Crear cuenta",
+                onVolverAtras = onVolverAtras
+            )
+        },
         modifier = modifier
     ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding).verticalScroll(rememberScrollState()).padding(24.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(modifier = Modifier.size(76.dp).background(AzulClaroRegistro, CircleShape), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.HealthAndSafety, null, tint = AzulRegistro, modifier = Modifier.size(38.dp))
+            Box(
+                modifier = Modifier
+                    .size(76.dp)
+                    .background(AzulClaroRegistro, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.HealthAndSafety,
+                    contentDescription = null,
+                    tint = AzulRegistro,
+                    modifier = Modifier.size(38.dp)
+                )
             }
+
             Spacer(Modifier.height(16.dp))
-            Text("Crea tu cuenta", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+
+            Text(
+                text = "Crea tu cuenta",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+
             Spacer(Modifier.height(5.dp))
-            Text("Regístrate para agendar y gestionar tus citas médicas.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+
+            Text(
+                text = "Regístrate para agendar y gestionar tus citas médicas.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+
             Spacer(Modifier.height(24.dp))
 
-            OutlinedTextField(value = nombre, onValueChange = { nombre = it; if (mensajeError.isNotEmpty()) mensajeError = "" }, label = { Text("Nombre completo") }, leadingIcon = { Icon(Icons.Filled.Person, null) }, singleLine = true, shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(
+                value = nombre,
+                onValueChange = { nuevoValor ->
+                    val caracteresPermitidos = nuevoValor.all {
+                        it.isLetter() ||
+                                it.isWhitespace() ||
+                                it == '-' ||
+                                it == '\''
+                    }
+
+                    if (caracteresPermitidos) {
+                        nombre = nuevoValor
+                    }
+
+                    if (mensajeError.isNotEmpty()) {
+                        mensajeError = ""
+                    }
+                },
+                label = { Text("Nombre completo") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Person,
+                        contentDescription = null
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.fillMaxWidth()
+            )
+
             Spacer(Modifier.height(13.dp))
-            OutlinedTextField(value = correo, onValueChange = { correo = it; if (mensajeError.isNotEmpty()) mensajeError = "" }, label = { Text("Correo electrónico") }, leadingIcon = { Icon(Icons.Filled.Email, null) }, singleLine = true, shape = RoundedCornerShape(14.dp), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth())
+
+            OutlinedTextField(
+                value = correo,
+                onValueChange = { nuevoValor ->
+                    // El correo no debe contener espacios.
+                    correo = nuevoValor.filterNot { it.isWhitespace() }
+                    if (mensajeError.isNotEmpty()) {
+                        mensajeError = ""
+                    }
+                },
+                label = { Text("Correo electrónico") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Email,
+                        contentDescription = null
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
             Spacer(Modifier.height(13.dp))
-            OutlinedTextField(value = password, onValueChange = { password = it; if (mensajeError.isNotEmpty()) mensajeError = "" }, label = { Text("Contraseña") }, leadingIcon = { Icon(Icons.Filled.Lock, null) }, singleLine = true, shape = RoundedCornerShape(14.dp), visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), modifier = Modifier.fillMaxWidth())
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { nuevoValor ->
+                    // Evita espacios en la contraseña desde la entrada.
+                    password = nuevoValor.filterNot { it.isWhitespace() }
+                    if (mensajeError.isNotEmpty()) {
+                        mensajeError = ""
+                    }
+                },
+                label = { Text("Contraseña") },
+                supportingText = {
+                    Text("Mínimo 6 caracteres, con letras y números")
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = null
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
             Spacer(Modifier.height(13.dp))
-            OutlinedTextField(value = confirmarPassword, onValueChange = { confirmarPassword = it; if (mensajeError.isNotEmpty()) mensajeError = "" }, label = { Text("Confirmar contraseña") }, leadingIcon = { Icon(Icons.Filled.Lock, null) }, singleLine = true, shape = RoundedCornerShape(14.dp), visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), modifier = Modifier.fillMaxWidth())
+
+            OutlinedTextField(
+                value = confirmarPassword,
+                onValueChange = { nuevoValor ->
+                    confirmarPassword =
+                        nuevoValor.filterNot { it.isWhitespace() }
+
+                    if (mensajeError.isNotEmpty()) {
+                        mensajeError = ""
+                    }
+                },
+                label = { Text("Confirmar contraseña") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = null
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
 
             if (mensajeError.isNotEmpty()) {
                 Spacer(Modifier.height(12.dp))
-                Text(mensajeError, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+
+                Text(
+                    text = mensajeError,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             Spacer(Modifier.height(22.dp))
+
             BotonPrincipal(
                 texto = "Crear cuenta",
                 onClick = {
-                    val nombreTrim = nombre.trim()
-                    val correoTrim = correo.trim()
+                    val nombreTrim =
+                        nombre.trim().replace(Regex("\\s+"), " ")
+                    val correoTrim = correo.trim().lowercase()
 
-                    if (nombreTrim.isEmpty() || correoTrim.isEmpty() || password.isEmpty() || confirmarPassword.isEmpty()) {
-                        mensajeError = "Por favor, completa todos los campos"
-                        return@BotonPrincipal
-                    }
-                    if (!correoTrim.contains("@") || !correoTrim.contains(".")) {
-                        mensajeError = "Por favor, ingresa un correo electrónico válido"
-                        return@BotonPrincipal
-                    }
-                    if (password.length < 6) {
-                        mensajeError = "La contraseña debe tener al menos 6 caracteres"
-                        return@BotonPrincipal
-                    }
-                    if (password != confirmarPassword) {
-                        mensajeError = "Las contraseñas no coinciden"
-                        return@BotonPrincipal
-                    }
+                    val nombreValido = Regex(
+                        "^[A-Za-zÁÉÍÓÚáéíóúÑñÜü]+(?:[ '-][A-Za-zÁÉÍÓÚáéíóúÑñÜü]+)+$"
+                    )
 
-                    val registrado = Repositorio.registrarUsuario(nombre = nombreTrim, correo = correoTrim, password = password)
-                    if (registrado) {
-                        mensajeError = ""
-                        onRegistroExitoso()
-                    } else {
-                        mensajeError = "El correo ya se encuentra registrado o no fue posible completar el registro"
+                    when {
+                        nombreTrim.isEmpty() ||
+                                correoTrim.isEmpty() ||
+                                password.isEmpty() ||
+                                confirmarPassword.isEmpty() -> {
+                            mensajeError =
+                                "Por favor, completa todos los campos"
+                        }
+
+                        !nombreValido.matches(nombreTrim) -> {
+                            mensajeError =
+                                "Ingresa tu nombre y apellido usando únicamente letras"
+                        }
+
+                        !Patterns.EMAIL_ADDRESS
+                            .matcher(correoTrim)
+                            .matches() -> {
+                            mensajeError =
+                                "Ingresa un correo electrónico válido"
+                        }
+
+                        password.length < 6 -> {
+                            mensajeError =
+                                "La contraseña debe tener al menos 6 caracteres"
+                        }
+
+                        password.none { it.isLetter() } ||
+                                password.none { it.isDigit() } -> {
+                            mensajeError =
+                                "La contraseña debe contener letras y números"
+                        }
+
+                        password != confirmarPassword -> {
+                            mensajeError =
+                                "Las contraseñas no coinciden"
+                        }
+
+                        Repositorio.obtenerUsuarios().any {
+                            it.correo.equals(
+                                correoTrim,
+                                ignoreCase = true
+                            )
+                        } -> {
+                            mensajeError =
+                                "Este correo electrónico ya está registrado"
+                        }
+
+                        else -> {
+                            val registrado =
+                                Repositorio.registrarUsuario(
+                                    nombre = nombreTrim,
+                                    correo = correoTrim,
+                                    password = password
+                                )
+
+                            if (registrado) {
+                                mensajeError = ""
+                                onRegistroExitoso()
+                            } else {
+                                mensajeError =
+                                    "No fue posible completar el registro. Revisa los datos ingresados."
+                            }
+                        }
                     }
                 }
             )
+
             Spacer(Modifier.height(10.dp))
+
             TextButton(onClick = onIniciarSesion) {
-                Text("¿Ya tienes una cuenta? Iniciar sesión", color = AzulRegistro, fontWeight = FontWeight.SemiBold)
+                Text(
+                    text = "¿Ya tienes una cuenta? Iniciar sesión",
+                    color = AzulRegistro,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
+
             TextButton(onClick = onVerTerminos) {
-                Text("Ver términos y condiciones", style = MaterialTheme.typography.labelMedium, color = AzulRegistro)
+                Text(
+                    text = "Ver términos y condiciones",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = AzulRegistro
+                )
             }
         }
     }
@@ -123,6 +327,11 @@ fun RegistroScreen(
 @Composable
 fun RegistroScreenPreview() {
     SaludPlusCitasTheme {
-        RegistroScreen(onRegistroExitoso = {}, onIniciarSesion = {}, onVerTerminos = {}, onVolverAtras = {})
+        RegistroScreen(
+            onRegistroExitoso = {},
+            onIniciarSesion = {},
+            onVerTerminos = {},
+            onVolverAtras = {}
+        )
     }
 }

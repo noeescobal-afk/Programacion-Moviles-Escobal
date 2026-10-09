@@ -1,7 +1,7 @@
-
 package com.saludplus.citas.ui.screens.perfil
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,11 +17,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -32,13 +38,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.saludplus.citas.R
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.theme.SaludPlusCitasTheme
@@ -53,6 +59,12 @@ fun PerfilScreen(
     modifier: Modifier = Modifier
 ) {
     val usuario = Repositorio.usuarioActual
+
+    val esUsuarioNoe = usuario?.correo.equals(
+        "Noe.escobal@tecsup.edu.pe",
+        ignoreCase = true
+    )
+
     val citas = if (usuario != null) {
         Repositorio.citasDelUsuario(usuario.id)
     } else {
@@ -76,35 +88,54 @@ fun PerfilScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onInicio,
-                    icon = { Text("⌂", fontSize = 23.sp) },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.Home,
+                            contentDescription = "Inicio"
+                        )
+                    },
                     label = { Text("Inicio") }
                 )
 
                 NavigationBarItem(
                     selected = false,
                     onClick = onMisCitas,
-                    icon = { Text("▦", fontSize = 22.sp) },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.CalendarMonth,
+                            contentDescription = "Mis citas"
+                        )
+                    },
                     label = { Text("Mis citas") }
                 )
 
                 NavigationBarItem(
                     selected = false,
                     onClick = onResultados,
-                    icon = { Text("▤", fontSize = 22.sp) },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Assignment,
+                            contentDescription = "Resultados"
+                        )
+                    },
                     label = { Text("Resultados") }
                 )
 
                 NavigationBarItem(
                     selected = true,
                     onClick = {},
-                    icon = { Text("●", fontSize = 20.sp) },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.Person,
+                            contentDescription = "Perfil"
+                        )
+                    },
                     label = { Text("Perfil") }
                 )
             }
         },
         modifier = modifier
     ) { innerPadding ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -128,25 +159,43 @@ fun PerfilScreen(
                     )
                 }
             } else {
-
-                // Fotografía personal del paciente
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Image(
-                    painter = painterResource(
-                        id = R.drawable.perfil_usuario
-                    ),
-                    contentDescription = "Fotografía de perfil de ${usuario.nombre}",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(124.dp)
-                        .clip(CircleShape)
-                        .border(
-                            width = 3.dp,
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = CircleShape
+                if (esUsuarioNoe) {
+                    Image(
+                        painter = painterResource(id = R.drawable.perfil_usuario),
+                        contentDescription = "Fotografía de perfil de ${usuario.nombre}",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(124.dp)
+                            .clip(CircleShape)
+                            .border(
+                                width = 3.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape
+                            )
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(124.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .border(
+                                width = 3.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Person,
+                            contentDescription = "Avatar de ${usuario.nombre}",
+                            modifier = Modifier.size(72.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
-                )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -167,13 +216,11 @@ fun PerfilScreen(
 
                 Spacer(modifier = Modifier.height(28.dp))
 
-                // Información personal
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor =
-                            MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
                     Column(
@@ -204,13 +251,11 @@ fun PerfilScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Resumen de actividad
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor =
-                            MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
                     Column(
@@ -256,7 +301,6 @@ fun PerfilScreen(
 
                 Spacer(modifier = Modifier.height(28.dp))
 
-                // Cerrar sesión
                 Button(
                     onClick = {
                         Repositorio.cerrarSesion()
