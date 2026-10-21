@@ -2,13 +2,17 @@ package com.tecsup.lavacampus.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
+import com.tecsup.lavacampus.util.esAtrasado
 import java.util.Locale
 
 @Composable
@@ -18,6 +22,10 @@ fun PedidoCard(
     onClick: () -> Unit = {}
 ) {
     val pedido = pedidoConDetalle.pedido
+    val esAtrasado = remember(pedido.fechaEntrega, pedido.estado) {
+        pedido.esAtrasado()
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -39,7 +47,26 @@ fun PedidoCard(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
-                EstadoPedidoChip(estado = pedido.estado)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (esAtrasado) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text(
+                                text = "Atrasado",
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                    EstadoPedidoChip(estado = pedido.estado)
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -47,7 +74,8 @@ fun PedidoCard(
             Text(
                 text = "Fecha de entrega: ${pedido.fechaEntrega}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (esAtrasado) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = if (esAtrasado) FontWeight.Bold else FontWeight.Normal
             )
 
             if (!pedido.casillero.isNullOrBlank()) {
