@@ -15,7 +15,10 @@ import com.tecsup.lavacampus.data.local.LavaDatabase
 import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepositoryRoom
 import com.tecsup.lavacampus.model.Rol
+import com.tecsup.lavacampus.ui.admin.BandejaScreen
+import com.tecsup.lavacampus.ui.admin.GestionPedidoScreen
 import com.tecsup.lavacampus.ui.admin.PanelScreen
+import com.tecsup.lavacampus.ui.components.AdminTab
 import com.tecsup.lavacampus.ui.components.SplashScreen
 import com.tecsup.lavacampus.ui.components.StudentTab
 import com.tecsup.lavacampus.ui.estudiante.*
@@ -28,6 +31,10 @@ sealed class AppScreen {
     object MisPedidos : AppScreen()
     object Tarifas : AppScreen()
     data class DetallePedido(val pedidoId: Int, val origen: AppScreen) : AppScreen()
+
+    object PanelAdmin : AppScreen()
+    object BandejaAdmin : AppScreen()
+    data class GestionPedidoAdmin(val pedidoId: Int) : AppScreen()
 }
 
 class MainActivity : ComponentActivity() {
@@ -59,15 +66,61 @@ class MainActivity : ComponentActivity() {
                             LoginScreen(viewModel = sesionViewModel)
                         }
                         usuario.rol == Rol.ADMIN.name -> {
-                            val panelViewModel: PanelViewModel = viewModel(
-                                factory = LavaViewModelFactory(repository, preferenciasStore),
-                                key = "panel_admin"
-                            )
-                            PanelScreen(
-                                usuario = usuario,
-                                viewModel = panelViewModel,
-                                onLogout = { sesionViewModel.cerrarSesion() }
-                            )
+                            val handleAdminTabSelected: (AdminTab) -> Unit = { tab ->
+                                currentScreen = when (tab) {
+                                    AdminTab.PANEL -> AppScreen.PanelAdmin
+                                    AdminTab.BANDEJA -> AppScreen.BandejaAdmin
+                                    else -> AppScreen.PanelAdmin
+                                }
+                            }
+
+                            when (val screen = currentScreen) {
+                                is AppScreen.PanelAdmin -> {
+                                    val panelViewModel: PanelViewModel = viewModel(
+                                        factory = LavaViewModelFactory(repository, preferenciasStore),
+                                        key = "panel_admin"
+                                    )
+                                    PanelScreen(
+                                        usuario = usuario,
+                                        viewModel = panelViewModel,
+                                        onTabSelected = handleAdminTabSelected,
+                                        onLogout = { sesionViewModel.cerrarSesion() }
+                                    )
+                                }
+                                is AppScreen.BandejaAdmin -> {
+                                    val bandejaViewModel: BandejaViewModel = viewModel(
+                                        factory = LavaViewModelFactory(repository, preferenciasStore),
+                                        key = "bandeja_admin"
+                                    )
+                                    BandejaScreen(
+                                        viewModel = bandejaViewModel,
+                                        onVerGestion = { id -> currentScreen = AppScreen.GestionPedidoAdmin(id) },
+                                        onTabSelected = handleAdminTabSelected
+                                    )
+                                }
+                                is AppScreen.GestionPedidoAdmin -> {
+                                    val gestionViewModel: GestionPedidoViewModel = viewModel(
+                                        factory = LavaViewModelFactory(repository, preferenciasStore, pedidoId = screen.pedidoId),
+                                        key = "gestion_${screen.pedidoId}"
+                                    )
+                                    GestionPedidoScreen(
+                                        viewModel = gestionViewModel,
+                                        onBack = { currentScreen = AppScreen.BandejaAdmin }
+                                    )
+                                }
+                                else -> {
+                                    val panelViewModel: PanelViewModel = viewModel(
+                                        factory = LavaViewModelFactory(repository, preferenciasStore),
+                                        key = "panel_admin"
+                                    )
+                                    PanelScreen(
+                                        usuario = usuario,
+                                        viewModel = panelViewModel,
+                                        onTabSelected = handleAdminTabSelected,
+                                        onLogout = { sesionViewModel.cerrarSesion() }
+                                    )
+                                }
+                            }
                         }
                         usuario.rol == Rol.CLIENTE.name -> {
                             val handleTabSelected: (StudentTab) -> Unit = { tab ->
@@ -140,6 +193,9 @@ class MainActivity : ComponentActivity() {
                                         }
                                     )
                                 }
+                                else -> {
+                                    currentScreen = AppScreen.Inicio
+                                }
                             }
                         }
                         else -> {
@@ -149,7 +205,7 @@ class MainActivity : ComponentActivity() {
                                     verticalArrangement = Arrangement.Center,
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Text(text = "Bienvenido Administrador: {${usuario.nombre}}")
+                                    Text(text = "Bienvenido: ${usuario.nombre}")
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Button(onClick = { sesionViewModel.cerrarSesion() }) {
                                         Text("Cerrar Sesión")

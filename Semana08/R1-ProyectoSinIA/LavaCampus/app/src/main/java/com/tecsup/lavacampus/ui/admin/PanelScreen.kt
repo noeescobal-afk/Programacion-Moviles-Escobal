@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tecsup.lavacampus.data.local.entity.Usuario
+import com.tecsup.lavacampus.ui.components.AdminBottomBar
+import com.tecsup.lavacampus.ui.components.AdminTab
 import com.tecsup.lavacampus.ui.components.AppTopBar
 import com.tecsup.lavacampus.ui.components.graficos.GraficoBarras
 import com.tecsup.lavacampus.ui.components.graficos.GraficoDona
@@ -23,6 +25,7 @@ import java.util.Locale
 fun PanelScreen(
     usuario: Usuario,
     viewModel: PanelViewModel,
+    onTabSelected: (AdminTab) -> Unit,
     onLogout: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -36,6 +39,12 @@ fun PanelScreen(
                         Text("Salir", color = MaterialTheme.colorScheme.onPrimaryContainer)
                     }
                 }
+            )
+        },
+        bottomBar = {
+            AdminBottomBar(
+                currentTab = AdminTab.PANEL,
+                onTabSelected = onTabSelected
             )
         }
     ) { paddingValues ->
