@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tecsup.lavacampus.model.Unidad
 import com.tecsup.lavacampus.ui.components.AppTopBar
 import com.tecsup.lavacampus.ui.components.IconoServicio
 import com.tecsup.lavacampus.ui.components.LavaButton
@@ -31,12 +32,27 @@ fun NuevoPedidoScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val total = remember(uiState.cantidades, uiState.servicios) {
+    val subtotal = remember(uiState.cantidades, uiState.servicios) {
         uiState.cantidades.entries.sumOf { (servId, cant) ->
             val servicio = uiState.servicios.find { it.id == servId }
             val precio = servicio?.precio ?: 0.0
             cant * precio
         }
+    }
+
+    val descuento = remember(uiState.cantidades, uiState.servicios) {
+        val servicioLavado = uiState.servicios.find { it.unidad == Unidad.KG.name }
+        val kgLavado = servicioLavado?.let { uiState.cantidades[it.id] } ?: 0.0
+        if (kgLavado > 5.0 && servicioLavado != null) {
+            val subtotalLavado = kgLavado * servicioLavado.precio
+            subtotalLavado * 0.10
+        } else {
+            0.0
+        }
+    }
+
+    val total = remember(subtotal, descuento) {
+        (subtotal - descuento).coerceAtLeast(0.0)
     }
 
     val isValid = remember(uiState.cantidades, uiState.recibirPedidos) {
@@ -232,7 +248,40 @@ fun NuevoPedidoScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Total estimado:",
+                                text = "Subtotal:",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = "S/ ${String.format(Locale.getDefault(), "%.2f", subtotal)}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        if (descuento > 0.0) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Descuento por volumen (-10%):",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "-S/ ${String.format(Locale.getDefault(), "%.2f", descuento)}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Total final:",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )

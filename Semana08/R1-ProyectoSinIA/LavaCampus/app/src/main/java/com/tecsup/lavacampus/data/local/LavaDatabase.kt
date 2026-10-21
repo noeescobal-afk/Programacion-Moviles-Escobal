@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.tecsup.lavacampus.data.local.dao.DetalleDao
 import com.tecsup.lavacampus.data.local.dao.PedidoDao
@@ -24,7 +25,7 @@ import kotlinx.coroutines.launch
         Pedido::class,
         DetallePedido::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class LavaDatabase : RoomDatabase() {
@@ -38,6 +39,12 @@ abstract class LavaDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: LavaDatabase? = null
 
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE pedidos ADD COLUMN descuento REAL NOT NULL DEFAULT 0.0")
+            }
+        }
+
         fun getDatabase(context: Context): LavaDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -45,6 +52,7 @@ abstract class LavaDatabase : RoomDatabase() {
                     LavaDatabase::class.java,
                     "lavacampus.db"
                 )
+                    .addMigrations(MIGRATION_1_2)
                     .addCallback(object : Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)

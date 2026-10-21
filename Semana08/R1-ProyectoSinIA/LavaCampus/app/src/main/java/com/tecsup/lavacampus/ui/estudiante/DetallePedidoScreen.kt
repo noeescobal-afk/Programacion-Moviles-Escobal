@@ -202,7 +202,7 @@ fun DetallePedidoScreen(
                                     val cantStr = if (servicio.unidad == Unidad.KG.name) {
                                         String.format(Locale.getDefault(), "%.1f kg", detalle.cantidad)
                                     } else {
-                                        "${detalle.cantidad.toInt()} ${if (detalle.cantidad == 1.0) "unidad" else "unidades"}"
+                                        "${detalle.cantidad.toInt()} unidades"
                                     }
                                     Text(
                                         text = "$cantStr • S/ ${String.format(Locale.getDefault(), "%.2f", detalle.precioUnitario)} c/u",
@@ -224,13 +224,25 @@ fun DetallePedidoScreen(
 
                         HorizontalDivider()
 
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Subtotal:")
+                            Text("S/ ${String.format(Locale.getDefault(), "%.2f", pedido.total + pedido.descuento)}")
+                        }
+
+                        if (pedido.descuento > 0.0) {
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Descuento por volumen (-10%):", color = MaterialTheme.colorScheme.primary)
+                                Text("-S/ ${String.format(Locale.getDefault(), "%.2f", pedido.descuento)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                            }
+                        }
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Total:",
+                                text = "Total final:",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -279,9 +291,7 @@ fun DetallePedidoScreen(
                 TextButton(
                     onClick = {
                         showCancelDialog = false
-                        viewModel.cancelarPedido(onSuccess = {
-                            // Cierra o se actualiza automáticamente via flow
-                        })
+                        viewModel.cancelarPedido(onSuccess = onBack)
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {

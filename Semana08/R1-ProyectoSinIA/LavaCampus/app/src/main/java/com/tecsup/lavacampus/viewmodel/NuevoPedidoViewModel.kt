@@ -6,6 +6,7 @@ import com.tecsup.lavacampus.data.local.entity.Servicio
 import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.LineaPedido
+import com.tecsup.lavacampus.model.Unidad
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -66,7 +67,7 @@ class NuevoPedidoViewModel(
         _uiState.update { it.copy(nota = nota, error = null) }
     }
 
-    val totalEstimado: Double
+    val subtotalEstimado: Double
         get() {
             val state = _uiState.value
             return state.cantidades.entries.sumOf { (servId, cant) ->
@@ -75,6 +76,21 @@ class NuevoPedidoViewModel(
                 cant * precio
             }
         }
+
+    val descuentoEstimado: Double
+        get() {
+            val state = _uiState.value
+            val servicioLavado = state.servicios.find { it.unidad == Unidad.KG.name }
+            val kgLavado = servicioLavado?.let { state.cantidades[it.id] } ?: 0.0
+            if (kgLavado > 5.0 && servicioLavado != null) {
+                val subtotalLavado = kgLavado * servicioLavado.precio
+                return subtotalLavado * 0.10
+            }
+            return 0.0
+        }
+
+    val totalEstimado: Double
+        get() = (subtotalEstimado - descuentoEstimado).coerceAtLeast(0.0)
 
     val fechaEstimadaEntrega: String
         get() {

@@ -82,6 +82,8 @@ class LavaRepositoryRoom(
         val fechaRegistroStr = LocalDate.now().format(formatter)
 
         var maxHoras = 0
+        var subtotalTotal = 0.0
+        var subtotalLavado = 0.0
         val detallesData = mutableListOf<Triple<Int, Double, Double>>().apply {
             for (linea in lineas) {
                 val servicio = servicioDao.obtener(linea.servicioId)
@@ -96,6 +98,12 @@ class LavaRepositoryRoom(
                 }
 
                 val precioActual = servicio.precio
+                val sub = linea.cantidad * precioActual
+                subtotalTotal += sub
+                if (servicio.unidad == Unidad.KG.name) {
+                    subtotalLavado += sub
+                }
+
                 add(Triple(servicio.id, linea.cantidad, precioActual))
             }
         }
@@ -107,10 +115,13 @@ class LavaRepositoryRoom(
         }
         val fechaEntregaStr = fechaEntregaDate.format(formatter)
 
-        var totalPedido = 0.0
-        for ((_, cant, precio) in detallesData) {
-            totalPedido += cant * precio
+        val kgLavadoTotal = lineas.sumOf { linea ->
+            val servicio = servicioDao.obtener(linea.servicioId)
+            if (servicio?.unidad == Unidad.KG.name) linea.cantidad else 0.0
         }
+
+        val descuento = if (kgLavadoTotal > 5.0) subtotalLavado * 0.10 else 0.0
+        val totalFinal = (subtotalTotal - descuento).coerceAtLeast(0.0)
 
         return database.withTransaction {
             val pedido = Pedido(
@@ -118,7 +129,8 @@ class LavaRepositoryRoom(
                 fechaRegistro = fechaRegistroStr,
                 fechaEntrega = fechaEntregaStr,
                 estado = EstadoPedido.RECIBIDO.name,
-                total = totalPedido,
+                total = totalFinal,
+                descuento = descuento,
                 casillero = null,
                 pagado = false,
                 nota = nota,
