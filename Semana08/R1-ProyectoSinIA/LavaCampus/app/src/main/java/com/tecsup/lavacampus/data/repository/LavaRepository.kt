@@ -1,37 +1,88 @@
 package com.tecsup.lavacampus.data.repository
 
 import com.tecsup.lavacampus.data.local.entity.Servicio
+import com.tecsup.lavacampus.data.local.entity.Usuario
+import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
+import com.tecsup.lavacampus.model.ClienteResumen
+import com.tecsup.lavacampus.model.EstadoPedido
+import com.tecsup.lavacampus.model.IngresoServicio
+import com.tecsup.lavacampus.model.LineaPedido
 import kotlinx.coroutines.flow.Flow
 
 interface LavaRepository {
-    // Servicios
-    fun observarServicios(): Flow<List<Servicio>>
-    fun observarServiciosActivos(): Flow<List<Servicio>>
-    suspend fun guardarServicio(servicio: Servicio)
-    suspend fun eliminarServicio(servicio: Servicio)
-    suspend fun cambiarActivo(id: Int, activo: Boolean)
-    suspend fun servicioTieneDetalles(servicioId: Int): Boolean
+    // USUARIOS
+    suspend fun login(
+        correo: String,
+        clave: String
+    ): Usuario?
 
-    /* TODO: Operaciones de Usuarios (Pasos futuros)
-    suspend fun login(email: String, clave: String): Any?
-    fun observarClientes(): Flow<List<com.tecsup.lavacampus.model.ClienteResumen>>
-    */
+    fun observarClientes():
+        Flow<List<ClienteResumen>>
 
-    /* TODO: Operaciones de Pedidos (Pasos futuros)
-    suspend fun crearPedido(pedido: Any, detalles: List<Any>): Long
-    suspend fun contarActivos(): Int
-    fun observarPedidosDeUsuario(usuarioId: Int): Flow<List<Any>>
-    fun observarPedidos(): Flow<List<Any>>
-    suspend fun observarPedido(pedidoId: Int): Any?
-    suspend fun cambiarEstado(pedidoId: Int, estado: com.tecsup.lavacampus.model.EstadoPedido)
-    suspend fun marcarPagado(pedidoId: Int, pagado: Boolean)
-    fun observarCasillerosOcupados(): Flow<List<String>>
-    */
+    // SERVICIOS
+    fun observarServicios():
+        Flow<List<Servicio>>
 
-    /* TODO: Operaciones de Panel (Pasos futuros)
-    fun observarPedidosDeFecha(fecha: String): Flow<List<Any>>
-    fun observarCantidadPorEstado(): Flow<Map<com.tecsup.lavacampus.model.EstadoPedido, Int>>
-    fun observarIngresosDesde(fecha: String): Flow<Double>
-    fun observarIngresosPorServicio(): Flow<List<com.tecsup.lavacampus.model.IngresoServicio>>
-    */
+    fun observarServiciosActivos():
+        Flow<List<Servicio>>
+
+    suspend fun guardarServicio(s: Servicio)
+
+    suspend fun eliminarServicio(s: Servicio)
+
+    suspend fun cambiarActivo(
+        id: Int,
+        activo: Boolean
+    )
+
+    suspend fun servicioTieneDetalles(id: Int): Boolean
+
+    // PEDIDOS
+    suspend fun crearPedido(
+        usuarioId: Int,
+        lineas: List<LineaPedido>,
+        nota: String
+    ): Long
+
+    fun observarPedidosUsuario(
+        usuarioId: Int
+    ): Flow<List<PedidoConDetalle>>
+
+    fun observarPedidos():
+        Flow<List<PedidoConDetalle>>
+
+    fun observarPedido(
+        id: Int
+    ): Flow<PedidoConDetalle?>
+
+    suspend fun cambiarEstado(
+        id: Int,
+        estado: EstadoPedido,
+        casillero: String?
+    )
+
+    suspend fun marcarPagado(
+        id: Int,
+        pagado: Boolean
+    )
+
+    fun observarCasillerosOcupados():
+        Flow<List<String>>
+
+    // PANEL
+    fun observarPedidosDeFecha(
+        fecha: String
+    ): Flow<Int>
+
+    fun observarCantidadPorEstado(
+        estado: EstadoPedido
+    ): Flow<Int>
+
+    fun observarIngresosDesde(
+        fechaInicio: String
+    ): Flow<Double>
+
+    fun observarIngresosPorServicio(
+        fechaInicio: String
+    ): Flow<List<IngresoServicio>>
 }
