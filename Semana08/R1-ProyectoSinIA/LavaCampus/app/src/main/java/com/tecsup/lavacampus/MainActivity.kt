@@ -16,10 +16,12 @@ import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepositoryRoom
 import com.tecsup.lavacampus.model.Rol
 import com.tecsup.lavacampus.ui.components.SplashScreen
+import com.tecsup.lavacampus.ui.estudiante.DetallePedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.InicioScreen
 import com.tecsup.lavacampus.ui.estudiante.LoginScreen
 import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.tecsup.lavacampus.ui.theme.LavaCampusTheme
+import com.tecsup.lavacampus.viewmodel.DetallePedidoViewModel
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
 import com.tecsup.lavacampus.viewmodel.LavaViewModelFactory
 import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
@@ -28,6 +30,7 @@ import com.tecsup.lavacampus.viewmodel.SesionViewModel
 sealed class AppScreen {
     object Inicio : AppScreen()
     object NuevoPedido : AppScreen()
+    data class DetallePedido(val pedidoId: Int) : AppScreen()
 }
 
 class MainActivity : ComponentActivity() {
@@ -59,7 +62,7 @@ class MainActivity : ComponentActivity() {
                             LoginScreen(viewModel = sesionViewModel)
                         }
                         usuario.rol == Rol.CLIENTE.name -> {
-                            when (currentScreen) {
+                            when (val screen = currentScreen) {
                                 is AppScreen.Inicio -> {
                                     val inicioViewModel: InicioViewModel = viewModel(
                                         factory = LavaViewModelFactory(repository, preferenciasStore, usuario.id),
@@ -68,7 +71,8 @@ class MainActivity : ComponentActivity() {
                                     InicioScreen(
                                         usuario = usuario,
                                         viewModel = inicioViewModel,
-                                        onNuevoPedido = { currentScreen = AppScreen.NuevoPedido }
+                                        onNuevoPedido = { currentScreen = AppScreen.NuevoPedido },
+                                        onVerDetalle = { id -> currentScreen = AppScreen.DetallePedido(id) }
                                     )
                                 }
                                 is AppScreen.NuevoPedido -> {
@@ -80,6 +84,16 @@ class MainActivity : ComponentActivity() {
                                         viewModel = nuevoPedidoViewModel,
                                         onBack = { currentScreen = AppScreen.Inicio },
                                         onPedidoCreado = { currentScreen = AppScreen.Inicio }
+                                    )
+                                }
+                                is AppScreen.DetallePedido -> {
+                                    val detalleViewModel: DetallePedidoViewModel = viewModel(
+                                        factory = LavaViewModelFactory(repository, preferenciasStore, usuarioId = usuario.id, pedidoId = screen.pedidoId),
+                                        key = "detalle_${screen.pedidoId}"
+                                    )
+                                    DetallePedidoScreen(
+                                        viewModel = detalleViewModel,
+                                        onBack = { currentScreen = AppScreen.Inicio }
                                     )
                                 }
                             }

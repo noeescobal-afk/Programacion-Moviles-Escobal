@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -28,6 +28,7 @@ fun InicioScreen(
     usuario: Usuario,
     viewModel: InicioViewModel,
     onNuevoPedido: () -> Unit = {},
+    onVerDetalle: (Int) -> Unit = {},
     onNavigatePedidos: () -> Unit = {},
     onNavigateTarifas: () -> Unit = {},
     onNavigatePerfil: () -> Unit = {}
@@ -56,7 +57,7 @@ fun InicioScreen(
                     onClick = {}
                 )
                 NavigationBarItem(
-                    icon = { Icon(Icons.Default.List, contentDescription = "Pedidos") },
+                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Pedidos") },
                     label = { Text("Pedidos") },
                     selected = false,
                     onClick = onNavigatePedidos
@@ -148,7 +149,10 @@ fun InicioScreen(
                     }
                 }
 
-                PedidoCard(pedidoConDetalle = pedido)
+                PedidoCard(
+                    pedidoConDetalle = pedido,
+                    onClick = { onVerDetalle(pedido.pedido.id) }
+                )
             } else {
                 Card(
                     modifier = Modifier.fillMaxWidth(),

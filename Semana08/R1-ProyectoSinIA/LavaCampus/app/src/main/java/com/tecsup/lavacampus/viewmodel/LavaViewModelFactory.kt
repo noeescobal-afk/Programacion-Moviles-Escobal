@@ -8,7 +8,8 @@ import com.tecsup.lavacampus.data.repository.LavaRepository
 class LavaViewModelFactory(
     private val repository: LavaRepository,
     private val preferenciasStore: PreferenciasStore,
-    private val usuarioId: Int = 0
+    private val usuarioId: Int = 0,
+    private val pedidoId: Int = 0
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -18,6 +19,8 @@ class LavaViewModelFactory(
             return InicioViewModel(repository, usuarioId) as T
         } else if (modelClass.isAssignableFrom(NuevoPedidoViewModel::class.java)) {
             return NuevoPedidoViewModel(repository) as T
+        } else if (modelClass.isAssignableFrom(DetallePedidoViewModel::class.java)) {
+            return DetallePedidoViewModel(repository, pedidoId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
     }
