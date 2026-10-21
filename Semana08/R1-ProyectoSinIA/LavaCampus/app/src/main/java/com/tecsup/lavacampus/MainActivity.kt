@@ -16,21 +16,17 @@ import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepositoryRoom
 import com.tecsup.lavacampus.model.Rol
 import com.tecsup.lavacampus.ui.components.SplashScreen
-import com.tecsup.lavacampus.ui.estudiante.DetallePedidoScreen
-import com.tecsup.lavacampus.ui.estudiante.InicioScreen
-import com.tecsup.lavacampus.ui.estudiante.LoginScreen
-import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
+import com.tecsup.lavacampus.ui.components.StudentTab
+import com.tecsup.lavacampus.ui.estudiante.*
 import com.tecsup.lavacampus.ui.theme.LavaCampusTheme
-import com.tecsup.lavacampus.viewmodel.DetallePedidoViewModel
-import com.tecsup.lavacampus.viewmodel.InicioViewModel
-import com.tecsup.lavacampus.viewmodel.LavaViewModelFactory
-import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
-import com.tecsup.lavacampus.viewmodel.SesionViewModel
+import com.tecsup.lavacampus.viewmodel.*
 
 sealed class AppScreen {
     object Inicio : AppScreen()
     object NuevoPedido : AppScreen()
-    data class DetallePedido(val pedidoId: Int) : AppScreen()
+    object MisPedidos : AppScreen()
+    object Tarifas : AppScreen()
+    data class DetallePedido(val pedidoId: Int, val origen: AppScreen) : AppScreen()
 }
 
 class MainActivity : ComponentActivity() {
@@ -62,6 +58,15 @@ class MainActivity : ComponentActivity() {
                             LoginScreen(viewModel = sesionViewModel)
                         }
                         usuario.rol == Rol.CLIENTE.name -> {
+                            val handleTabSelected: (StudentTab) -> Unit = { tab ->
+                                currentScreen = when (tab) {
+                                    StudentTab.INICIO -> AppScreen.Inicio
+                                    StudentTab.PEDIDOS -> AppScreen.MisPedidos
+                                    StudentTab.TARIFAS -> AppScreen.Tarifas
+                                    StudentTab.PERFIL -> AppScreen.Inicio
+                                }
+                            }
+
                             when (val screen = currentScreen) {
                                 is AppScreen.Inicio -> {
                                     val inicioViewModel: InicioViewModel = viewModel(
@@ -72,7 +77,29 @@ class MainActivity : ComponentActivity() {
                                         usuario = usuario,
                                         viewModel = inicioViewModel,
                                         onNuevoPedido = { currentScreen = AppScreen.NuevoPedido },
-                                        onVerDetalle = { id -> currentScreen = AppScreen.DetallePedido(id) }
+                                        onVerDetalle = { id -> currentScreen = AppScreen.DetallePedido(id, AppScreen.Inicio) },
+                                        onTabSelected = handleTabSelected
+                                    )
+                                }
+                                is AppScreen.MisPedidos -> {
+                                    val misPedidosViewModel: MisPedidosViewModel = viewModel(
+                                        factory = LavaViewModelFactory(repository, preferenciasStore, usuarioId = usuario.id),
+                                        key = "mis_pedidos_${usuario.id}"
+                                    )
+                                    MisPedidosScreen(
+                                        usuario = usuario,
+                                        viewModel = misPedidosViewModel,
+                                        onVerDetalle = { id -> currentScreen = AppScreen.DetallePedido(id, AppScreen.MisPedidos) },
+                                        onTabSelected = handleTabSelected
+                                    )
+                                }
+                                is AppScreen.Tarifas -> {
+                                    val tarifasViewModel: TarifasViewModel = viewModel(
+                                        factory = LavaViewModelFactory(repository, preferenciasStore)
+                                    )
+                                    TarifasScreen(
+                                        viewModel = tarifasViewModel,
+                                        onTabSelected = handleTabSelected
                                     )
                                 }
                                 is AppScreen.NuevoPedido -> {
@@ -83,7 +110,7 @@ class MainActivity : ComponentActivity() {
                                         usuarioId = usuario.id,
                                         viewModel = nuevoPedidoViewModel,
                                         onBack = { currentScreen = AppScreen.Inicio },
-                                        onPedidoCreado = { currentScreen = AppScreen.Inicio }
+                                        onPedidoCreado = { currentScreen = AppScreen.MisPedidos }
                                     )
                                 }
                                 is AppScreen.DetallePedido -> {
@@ -93,7 +120,12 @@ class MainActivity : ComponentActivity() {
                                     )
                                     DetallePedidoScreen(
                                         viewModel = detalleViewModel,
-                                        onBack = { currentScreen = AppScreen.Inicio }
+                                        onBack = {
+                                            currentScreen = when (screen.origen) {
+                                                is AppScreen.MisPedidos -> AppScreen.MisPedidos
+                                                else -> AppScreen.Inicio
+                                            }
+                                        }
                                     )
                                 }
                             }

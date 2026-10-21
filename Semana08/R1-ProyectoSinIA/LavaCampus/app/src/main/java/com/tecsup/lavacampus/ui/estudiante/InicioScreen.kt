@@ -3,11 +3,6 @@ package com.tecsup.lavacampus.ui.estudiante
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,6 +15,8 @@ import com.tecsup.lavacampus.data.local.entity.Usuario
 import com.tecsup.lavacampus.ui.components.AppTopBar
 import com.tecsup.lavacampus.ui.components.LavaButton
 import com.tecsup.lavacampus.ui.components.PedidoCard
+import com.tecsup.lavacampus.ui.components.StudentBottomBar
+import com.tecsup.lavacampus.ui.components.StudentTab
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,9 +26,7 @@ fun InicioScreen(
     viewModel: InicioViewModel,
     onNuevoPedido: () -> Unit = {},
     onVerDetalle: (Int) -> Unit = {},
-    onNavigatePedidos: () -> Unit = {},
-    onNavigateTarifas: () -> Unit = {},
-    onNavigatePerfil: () -> Unit = {}
+    onTabSelected: (StudentTab) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -47,34 +42,10 @@ fun InicioScreen(
             )
         },
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
-                    label = { Text("Inicio") },
-                    selected = true,
-                    onClick = {}
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Pedidos") },
-                    label = { Text("Pedidos") },
-                    selected = false,
-                    onClick = onNavigatePedidos
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Star, contentDescription = "Tarifas") },
-                    label = { Text("Tarifas") },
-                    selected = false,
-                    onClick = onNavigateTarifas
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Default.Person, contentDescription = "Perfil") },
-                    label = { Text("Perfil") },
-                    selected = false,
-                    onClick = onNavigatePerfil
-                )
-            }
+            StudentBottomBar(
+                currentTab = StudentTab.INICIO,
+                onTabSelected = onTabSelected
+            )
         }
     ) { paddingValues ->
         Column(
