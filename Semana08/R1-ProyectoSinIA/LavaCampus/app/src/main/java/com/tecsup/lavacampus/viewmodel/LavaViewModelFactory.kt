@@ -16,6 +16,8 @@ class LavaViewModelFactory(
             return SesionViewModel(repository, preferenciasStore) as T
         } else if (modelClass.isAssignableFrom(InicioViewModel::class.java)) {
             return InicioViewModel(repository, usuarioId) as T
+        } else if (modelClass.isAssignableFrom(NuevoPedidoViewModel::class.java)) {
+            return NuevoPedidoViewModel(repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
     }

@@ -18,10 +18,17 @@ import com.tecsup.lavacampus.model.Rol
 import com.tecsup.lavacampus.ui.components.SplashScreen
 import com.tecsup.lavacampus.ui.estudiante.InicioScreen
 import com.tecsup.lavacampus.ui.estudiante.LoginScreen
+import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.tecsup.lavacampus.ui.theme.LavaCampusTheme
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
 import com.tecsup.lavacampus.viewmodel.LavaViewModelFactory
+import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
 import com.tecsup.lavacampus.viewmodel.SesionViewModel
+
+sealed class AppScreen {
+    object Inicio : AppScreen()
+    object NuevoPedido : AppScreen()
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,6 +47,8 @@ class MainActivity : ComponentActivity() {
             val usuario = uiState.usuario
             val isAdmin = uiState.rolSeleccionado == Rol.ADMIN
 
+            var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Inicio) }
+
             LavaCampusTheme(isAdmin = isAdmin) {
                 var showSplash by remember { mutableStateOf(true) }
                 if (showSplash) {
@@ -50,15 +59,30 @@ class MainActivity : ComponentActivity() {
                             LoginScreen(viewModel = sesionViewModel)
                         }
                         usuario.rol == Rol.CLIENTE.name -> {
-                            val inicioViewModel: InicioViewModel = viewModel(
-                                factory = LavaViewModelFactory(repository, preferenciasStore, usuario.id),
-                                key = "inicio_${usuario.id}"
-                            )
-                            InicioScreen(
-                                usuario = usuario,
-                                viewModel = inicioViewModel,
-                                onNuevoPedido = { /* TODO: Step 2 */ }
-                            )
+                            when (currentScreen) {
+                                is AppScreen.Inicio -> {
+                                    val inicioViewModel: InicioViewModel = viewModel(
+                                        factory = LavaViewModelFactory(repository, preferenciasStore, usuario.id),
+                                        key = "inicio_${usuario.id}"
+                                    )
+                                    InicioScreen(
+                                        usuario = usuario,
+                                        viewModel = inicioViewModel,
+                                        onNuevoPedido = { currentScreen = AppScreen.NuevoPedido }
+                                    )
+                                }
+                                is AppScreen.NuevoPedido -> {
+                                    val nuevoPedidoViewModel: NuevoPedidoViewModel = viewModel(
+                                        factory = LavaViewModelFactory(repository, preferenciasStore)
+                                    )
+                                    NuevoPedidoScreen(
+                                        usuarioId = usuario.id,
+                                        viewModel = nuevoPedidoViewModel,
+                                        onBack = { currentScreen = AppScreen.Inicio },
+                                        onPedidoCreado = { currentScreen = AppScreen.Inicio }
+                                    )
+                                }
+                            }
                         }
                         else -> {
                             Surface(modifier = Modifier.fillMaxSize()) {
