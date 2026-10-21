@@ -18,7 +18,7 @@ class LavaViewModelFactory(
         } else if (modelClass.isAssignableFrom(InicioViewModel::class.java)) {
             return InicioViewModel(repository, usuarioId) as T
         } else if (modelClass.isAssignableFrom(NuevoPedidoViewModel::class.java)) {
-            return NuevoPedidoViewModel(repository) as T
+            return NuevoPedidoViewModel(repository, preferenciasStore) as T
         } else if (modelClass.isAssignableFrom(DetallePedidoViewModel::class.java)) {
             return DetallePedidoViewModel(repository, pedidoId) as T
         } else if (modelClass.isAssignableFrom(MisPedidosViewModel::class.java)) {
@@ -31,6 +31,12 @@ class LavaViewModelFactory(
             return BandejaViewModel(repository) as T
         } else if (modelClass.isAssignableFrom(GestionPedidoViewModel::class.java)) {
             return GestionPedidoViewModel(repository, pedidoId) as T
+        } else if (modelClass.isAssignableFrom(ClientesViewModel::class.java)) {
+            return ClientesViewModel(repository) as T
+        } else if (modelClass.isAssignableFrom(AdminServiciosViewModel::class.java)) {
+            return AdminServiciosViewModel(repository) as T
+        } else if (modelClass.isAssignableFrom(PerfilViewModel::class.java)) {
+            return PerfilViewModel(repository, usuarioId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
     }

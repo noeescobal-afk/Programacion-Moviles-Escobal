@@ -32,6 +32,18 @@ class SesionViewModel(
             preferenciasStore.rolSeleccionado.collect { rol ->
                 if (rol != null) {
                     _uiState.update { it.copy(rolSeleccionado = rol, perfilGuardado = rol) }
+                    if (_uiState.value.usuario == null) {
+                        val defaultEmail = if (rol == Rol.ADMIN) "admin@lavacampus.test" else "ana@correo.test"
+                        val defaultClave = if (rol == Rol.ADMIN) "admin" else "1234"
+                        try {
+                            val user = repository.login(defaultEmail, defaultClave)
+                            if (user != null) {
+                                _uiState.update { it.copy(usuario = user) }
+                            }
+                        } catch (e: Exception) {
+                            // ignore
+                        }
+                    }
                 }
             }
         }
@@ -96,6 +108,27 @@ class SesionViewModel(
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(cargando = false, error = e.message ?: "Error al iniciar sesión") }
+            }
+        }
+    }
+
+    fun cambiarPerfil(nuevoRol: Rol) {
+        viewModelScope.launch {
+            preferenciasStore.setRolSeleccionado(nuevoRol)
+            val defaultEmail = if (nuevoRol == Rol.ADMIN) "admin@lavacampus.test" else "ana@correo.test"
+            val defaultClave = if (nuevoRol == Rol.ADMIN) "admin" else "1234"
+            try {
+                val user = repository.login(defaultEmail, defaultClave)
+                _uiState.update { 
+                    it.copy(
+                        rolSeleccionado = nuevoRol,
+                        perfilGuardado = nuevoRol,
+                        usuario = user,
+                        error = null
+                    ) 
+                }
+            } catch (e: Exception) {
+                // ignore
             }
         }
     }

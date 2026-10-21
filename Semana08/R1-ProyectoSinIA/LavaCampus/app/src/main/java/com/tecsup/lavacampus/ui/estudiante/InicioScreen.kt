@@ -80,6 +80,14 @@ fun InicioScreen(
                 }
             }
 
+            Button(
+                onClick = onNuevoPedido,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Nuevo pedido", color = MaterialTheme.colorScheme.onPrimary)
+            }
+
             Text(
                 text = "Seguimiento de Pedido Activo",
                 style = MaterialTheme.typography.titleMedium,

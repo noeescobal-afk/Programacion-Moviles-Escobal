@@ -6,17 +6,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tecsup.lavacampus.ui.components.AppTopBar
 import com.tecsup.lavacampus.ui.components.IconoServicio
 import com.tecsup.lavacampus.ui.components.LavaButton
 import com.tecsup.lavacampus.ui.components.SelectorCantidad
 import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,23 +30,47 @@ fun NuevoPedidoScreen(
     onPedidoCreado: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val total = viewModel.totalEstimado
-    val fechaEntrega = viewModel.fechaEstimadaEntrega
-    val isValid = viewModel.tieneSeleccionValida
+
+    val total = remember(uiState.cantidades, uiState.servicios) {
+        uiState.cantidades.entries.sumOf { (servId, cant) ->
+            val servicio = uiState.servicios.find { it.id == servId }
+            val precio = servicio?.precio ?: 0.0
+            cant * precio
+        }
+    }
+
+    val isValid = remember(uiState.cantidades, uiState.recibirPedidos) {
+        uiState.recibirPedidos && uiState.cantidades.values.any { it > 0.0 }
+    }
+
+    val fechaEntrega = remember(uiState.cantidades, uiState.servicios) {
+        var maxHoras = 0
+        for ((servId, cant) in uiState.cantidades) {
+            if (cant > 0.0) {
+                val servicio = uiState.servicios.find { it.id == servId }
+                if (servicio != null && servicio.horasEntrega > maxHoras) {
+                    maxHoras = servicio.horasEntrega
+                }
+            }
+        }
+        val horas = if (maxHoras > 0) maxHoras else 24
+        val dias = horas / 24
+        var fecha = LocalDate.now().plusDays(dias.toLong())
+        if (fecha.dayOfWeek == DayOfWeek.SUNDAY) {
+            fecha = fecha.plusDays(1)
+        }
+        fecha.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Nuevo pedido") },
-                navigationIcon = {
+            AppTopBar(
+                title = "Nuevo pedido",
+                actions = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                }
             )
         }
     ) { paddingValues ->
@@ -70,6 +96,23 @@ fun NuevoPedidoScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(vertical = 16.dp)
                 ) {
+                    if (!uiState.recibirPedidos) {
+                        item {
+                            Card(
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "La lavandería no está recibiendo pedidos",
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                        }
+                    }
+
                     items(uiState.servicios) { servicio ->
                         val cantidadActual = uiState.cantidades[servicio.id] ?: 0.0
 

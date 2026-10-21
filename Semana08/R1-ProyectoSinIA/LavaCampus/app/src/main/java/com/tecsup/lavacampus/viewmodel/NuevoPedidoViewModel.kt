@@ -3,6 +3,7 @@ package com.tecsup.lavacampus.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.lavacampus.data.local.entity.Servicio
+import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.LineaPedido
 import kotlinx.coroutines.flow.*
@@ -18,11 +19,13 @@ data class NuevoPedidoUiState(
     val cargando: Boolean = true,
     val error: String? = null,
     val exito: Boolean = false,
-    val guardando: Boolean = false
+    val guardando: Boolean = false,
+    val recibirPedidos: Boolean = true
 )
 
 class NuevoPedidoViewModel(
-    private val repository: LavaRepository
+    private val repository: LavaRepository,
+    private val preferenciasStore: PreferenciasStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NuevoPedidoUiState())
@@ -30,6 +33,11 @@ class NuevoPedidoViewModel(
 
     init {
         observarServicios()
+        viewModelScope.launch {
+            preferenciasStore.recibirPedidos.collect { activo ->
+                _uiState.update { it.copy(recibirPedidos = activo) }
+            }
+        }
     }
 
     private fun observarServicios() {
@@ -97,6 +105,11 @@ class NuevoPedidoViewModel(
 
     fun confirmarPedido(usuarioId: Int, onComplete: () -> Unit) {
         val state = _uiState.value
+        if (!state.recibirPedidos) {
+            _uiState.update { it.copy(error = "La lavandería no está recibiendo pedidos") }
+            return
+        }
+
         val lineas = state.cantidades.mapNotNull { (servId, cant) ->
             if (cant > 0.0) {
                 val servicio = state.servicios.find { it.id == servId }
