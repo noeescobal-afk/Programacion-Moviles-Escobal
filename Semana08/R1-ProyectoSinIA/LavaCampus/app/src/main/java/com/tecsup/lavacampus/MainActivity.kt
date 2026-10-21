@@ -15,6 +15,7 @@ import com.tecsup.lavacampus.data.local.LavaDatabase
 import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepositoryRoom
 import com.tecsup.lavacampus.model.Rol
+import com.tecsup.lavacampus.ui.admin.PanelScreen
 import com.tecsup.lavacampus.ui.components.SplashScreen
 import com.tecsup.lavacampus.ui.components.StudentTab
 import com.tecsup.lavacampus.ui.estudiante.*
@@ -56,6 +57,17 @@ class MainActivity : ComponentActivity() {
                     when {
                         usuario == null -> {
                             LoginScreen(viewModel = sesionViewModel)
+                        }
+                        usuario.rol == Rol.ADMIN.name -> {
+                            val panelViewModel: PanelViewModel = viewModel(
+                                factory = LavaViewModelFactory(repository, preferenciasStore),
+                                key = "panel_admin"
+                            )
+                            PanelScreen(
+                                usuario = usuario,
+                                viewModel = panelViewModel,
+                                onLogout = { sesionViewModel.cerrarSesion() }
+                            )
                         }
                         usuario.rol == Rol.CLIENTE.name -> {
                             val handleTabSelected: (StudentTab) -> Unit = { tab ->
@@ -137,7 +149,7 @@ class MainActivity : ComponentActivity() {
                                     verticalArrangement = Arrangement.Center,
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Text(text = "Bienvenido Administrador: ${usuario.nombre}")
+                                    Text(text = "Bienvenido Administrador: {${usuario.nombre}}")
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Button(onClick = { sesionViewModel.cerrarSesion() }) {
                                         Text("Cerrar Sesión")
