@@ -24,13 +24,15 @@ import java.util.Locale
 @Composable
 fun DetallePedidoScreen(
     viewModel: DetallePedidoViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onRepetirPedido: (Int) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pedidoConDetalle = uiState.pedidoConDetalle
     val pedido = pedidoConDetalle?.pedido
 
     var showCancelDialog by remember { mutableStateOf(false) }
+    var showRepeatDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -265,8 +267,17 @@ fun DetallePedidoScreen(
                     )
                 }
 
+                Spacer(modifier = Modifier.height(4.dp))
+                Button(
+                    onClick = { showRepeatDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(text = "Repetir pedido")
+                }
+
                 if (esRecibido) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Button(
                         onClick = { showCancelDialog = true },
                         modifier = Modifier.fillMaxWidth(),
@@ -301,6 +312,29 @@ fun DetallePedidoScreen(
             dismissButton = {
                 TextButton(onClick = { showCancelDialog = false }) {
                     Text("Volver")
+                }
+            }
+        )
+    }
+
+    if (showRepeatDialog) {
+        AlertDialog(
+            onDismissRequest = { showRepeatDialog = false },
+            title = { Text("¿Repetir pedido?") },
+            text = { Text("¿Deseas utilizar los servicios y cantidades de este pedido como base para un nuevo pedido?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showRepeatDialog = false
+                        pedido?.let { onRepetirPedido(it.id) }
+                    }
+                ) {
+                    Text("Continuar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRepeatDialog = false }) {
+                    Text("Cancelar")
                 }
             }
         )

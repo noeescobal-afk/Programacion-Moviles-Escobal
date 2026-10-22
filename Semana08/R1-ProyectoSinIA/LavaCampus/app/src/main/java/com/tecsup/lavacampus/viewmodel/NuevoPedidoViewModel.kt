@@ -26,14 +26,15 @@ data class NuevoPedidoUiState(
 
 class NuevoPedidoViewModel(
     private val repository: LavaRepository,
-    private val preferenciasStore: PreferenciasStore
+    private val preferenciasStore: PreferenciasStore,
+    private val repetirPedidoId: Int? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NuevoPedidoUiState())
     val uiState: StateFlow<NuevoPedidoUiState> = _uiState.asStateFlow()
 
     init {
-        observarServicios()
+        observarServiciosYPrecargar()
         viewModelScope.launch {
             preferenciasStore.recibirPedidos.collect { activo ->
                 _uiState.update { it.copy(recibirPedidos = activo) }
@@ -41,12 +42,39 @@ class NuevoPedidoViewModel(
         }
     }
 
-    private fun observarServicios() {
+    private fun observarServiciosYPrecargar() {
         viewModelScope.launch {
             repository.observarServiciosActivos()
                 .catch { e -> _uiState.update { it.copy(cargando = false, error = e.message) } }
-                .collect { lista ->
-                    _uiState.update { it.copy(servicios = lista, cargando = false) }
+                .collect { listaServiciosActivos ->
+                    val initialCantidades = mutableMapOf<Int, Double>()
+                    var avisoInactivos = false
+
+                    if (repetirPedidoId != null && _uiState.value.cargando) {
+                        try {
+                            val pedidoOriginal = repository.observarPedido(repetirPedidoId).filterNotNull().first()
+                            for (detalleServ in pedidoOriginal.detalles) {
+                                val servId = detalleServ.servicio.id
+                                val servicioActual = listaServiciosActivos.find { it.id == servId }
+                                if (servicioActual != null && servicioActual.activo) {
+                                    initialCantidades[servId] = detalleServ.detalle.cantidad
+                                } else {
+                                    avisoInactivos = true
+                                }
+                            }
+                        } catch (e: Exception) {
+                            // ignore
+                        }
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            servicios = listaServiciosActivos,
+                            cantidades = if (initialCantidades.isNotEmpty() && it.cantidades.isEmpty()) initialCantidades else it.cantidades,
+                            cargando = false,
+                            error = if (avisoInactivos && it.error == null) "Algunos servicios del pedido anterior ya no están disponibles y no fueron incluidos." else it.error
+                        )
+                    }
                 }
         }
     }

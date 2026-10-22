@@ -9,7 +9,8 @@ class LavaViewModelFactory(
     private val repository: LavaRepository,
     private val preferenciasStore: PreferenciasStore,
     private val usuarioId: Int = 0,
-    private val pedidoId: Int = 0
+    private val pedidoId: Int = 0,
+    private val repetirPedidoId: Int? = null
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -18,7 +19,7 @@ class LavaViewModelFactory(
         } else if (modelClass.isAssignableFrom(InicioViewModel::class.java)) {
             return InicioViewModel(repository, usuarioId) as T
         } else if (modelClass.isAssignableFrom(NuevoPedidoViewModel::class.java)) {
-            return NuevoPedidoViewModel(repository, preferenciasStore) as T
+            return NuevoPedidoViewModel(repository, preferenciasStore, repetirPedidoId) as T
         } else if (modelClass.isAssignableFrom(DetallePedidoViewModel::class.java)) {
             return DetallePedidoViewModel(repository, pedidoId) as T
         } else if (modelClass.isAssignableFrom(MisPedidosViewModel::class.java)) {

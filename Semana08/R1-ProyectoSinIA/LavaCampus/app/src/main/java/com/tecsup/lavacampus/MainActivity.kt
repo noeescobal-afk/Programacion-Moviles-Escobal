@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 
 sealed class AppScreen {
     object Inicio : AppScreen()
-    object NuevoPedido : AppScreen()
+    data class NuevoPedido(val repetirPedidoId: Int? = null) : AppScreen()
     object MisPedidos : AppScreen()
     object Tarifas : AppScreen()
     object Perfil : AppScreen()
@@ -65,7 +65,6 @@ class MainActivity : ComponentActivity() {
 
             var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Inicio) }
 
-            // Si cambia el rol (ej. cambiar de perfil), asegurar que currentScreen apunte al panel admin o inicio según corresponda
             LaunchedEffect(isAdmin) {
                 currentScreen = if (isAdmin) AppScreen.PanelAdmin else AppScreen.Inicio
             }
@@ -213,7 +212,7 @@ class MainActivity : ComponentActivity() {
                                     InicioScreen(
                                         usuario = usuario,
                                         viewModel = inicioViewModel,
-                                        onNuevoPedido = { currentScreen = AppScreen.NuevoPedido },
+                                        onNuevoPedido = { currentScreen = AppScreen.NuevoPedido() },
                                         onVerDetalle = { id -> currentScreen = AppScreen.DetallePedido(id, AppScreen.Inicio) },
                                         onTabSelected = handleTabSelected
                                     )
@@ -265,7 +264,8 @@ class MainActivity : ComponentActivity() {
                                 }
                                 is AppScreen.NuevoPedido -> {
                                     val nuevoPedidoViewModel: NuevoPedidoViewModel = viewModel(
-                                        factory = LavaViewModelFactory(repository, preferenciasStore)
+                                        factory = LavaViewModelFactory(repository, preferenciasStore, repetirPedidoId = screen.repetirPedidoId),
+                                        key = "nuevo_pedido_${screen.repetirPedidoId ?: 0}"
                                     )
                                     NuevoPedidoScreen(
                                         usuarioId = usuario.id,
@@ -286,6 +286,9 @@ class MainActivity : ComponentActivity() {
                                                 is AppScreen.MisPedidos -> AppScreen.MisPedidos
                                                 else -> AppScreen.Inicio
                                             }
+                                        },
+                                        onRepetirPedido = { id ->
+                                            currentScreen = AppScreen.NuevoPedido(repetirPedidoId = id)
                                         }
                                     )
                                 }
