@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.tecsup.lavacampus.model.EstadoPedido
 import com.tecsup.lavacampus.model.Unidad
 import com.tecsup.lavacampus.ui.components.AppTopBar
+import com.tecsup.lavacampus.ui.components.DestructiveButton
 import com.tecsup.lavacampus.ui.components.EstadoPedidoChip
 import com.tecsup.lavacampus.ui.components.IconoServicio
 import com.tecsup.lavacampus.ui.components.StepperEstado
@@ -278,16 +280,12 @@ fun DetallePedidoScreen(
 
                 if (esRecibido) {
                     Spacer(modifier = Modifier.height(4.dp))
-                    Button(
+                    DestructiveButton(
+                        text = if (uiState.cancelando) "Cancelando..." else "Cancelar pedido",
                         onClick = { showCancelDialog = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        ),
-                        enabled = !uiState.cancelando
-                    ) {
-                        Text(text = if (uiState.cancelando) "Cancelando..." else "Cancelar pedido")
-                    }
+                        enabled = !uiState.cancelando,
+                        icon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(20.dp)) }
+                    )
                 }
             }
         }

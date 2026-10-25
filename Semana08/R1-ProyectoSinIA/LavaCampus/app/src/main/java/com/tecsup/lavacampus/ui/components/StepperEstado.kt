@@ -3,6 +3,7 @@ package com.tecsup.lavacampus.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ fun StepperEstado(estadoActual: String) {
     if (estadoActual == EstadoPedido.CANCELADO.name) {
         Card(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+            shape =     RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
@@ -55,7 +57,7 @@ fun StepperEstado(estadoActual: String) {
             ) {
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(30.dp)
                         .clip(CircleShape)
                         .background(
                             when {

@@ -11,16 +11,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecsup.lavacampus.model.EstadoPedido
+import com.tecsup.lavacampus.ui.theme.*
 
 @Composable
 fun EstadoPedidoChip(estado: String) {
     val (bgColor, textColor) = when (estado) {
-        EstadoPedido.RECIBIDO.name -> Color(0xFFFEF3C7) to Color(0xFFD97706)
-        EstadoPedido.EN_PROCESO.name -> Color(0xFFDBEAFE) to Color(0xFF2563EB)
-        EstadoPedido.LISTO.name -> Color(0xFFDCFCE7) to Color(0xFF16A34A)
-        EstadoPedido.ENTREGADO.name -> Color(0xFFF1F5F9) to Color(0xFF475569)
-        EstadoPedido.CANCELADO.name -> Color(0xFFFEE2E2) to Color(0xFFDC2626)
-        else -> Color.LightGray to Color.DarkGray
+        EstadoPedido.RECIBIDO.name -> StatusRecibido.copy(alpha = 0.2f) to StatusRecibido
+        EstadoPedido.EN_PROCESO.name -> StatusEnProceso.copy(alpha = 0.2f) to StatusEnProceso
+        EstadoPedido.LISTO.name -> StatusListo.copy(alpha = 0.2f) to StatusListo
+        EstadoPedido.ENTREGADO.name -> StatusEntregado.copy(alpha = 0.2f) to StatusEntregado
+        EstadoPedido.CANCELADO.name -> StatusCancelado.copy(alpha = 0.2f) to StatusCancelado
+        else -> Color.DarkGray to Color.LightGray
     }
 
     val label = when (estado) {
@@ -34,14 +35,14 @@ fun EstadoPedidoChip(estado: String) {
 
     Surface(
         color = bgColor,
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(12.dp)
     ) {
         Text(
             text = label,
             color = textColor,
-            fontSize = 12.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
         )
     }
 }
