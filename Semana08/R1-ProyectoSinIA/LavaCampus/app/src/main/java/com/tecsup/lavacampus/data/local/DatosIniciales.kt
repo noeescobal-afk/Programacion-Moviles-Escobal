@@ -67,7 +67,7 @@ object DatosIniciales {
         val idEdredon = servicioIds[3].toInt()
 
         val usuarios = listOf(
-            Usuario(nombre = "Ana Gómez", codigo = "EST-001", correo = "ana@correo.test", clave = "1234", rol = "CLIENTE"),
+            Usuario(nombre = "Noe Escobal", codigo = "EST-001", correo = "noe.escobal@tecsup.edu.pe", clave = "1234", rol = "CLIENTE"),
             Usuario(nombre = "Luis Pérez", codigo = "EST-002", correo = "luis@correo.test", clave = "1234", rol = "CLIENTE"),
             Usuario(nombre = "Marta Torres", codigo = "EST-003", correo = "marta@correo.test", clave = "1234", rol = "CLIENTE"),
             Usuario(nombre = "Administrador", codigo = "", correo = "admin@lavacampus.test", clave = "admin", rol = "ADMIN")
@@ -78,7 +78,7 @@ object DatosIniciales {
             val id = usuarioDao.insertar(u)
             usuarioIds.add(id)
         }
-        val idAna = usuarioIds[0].toInt()
+        val idNoe = usuarioIds[0].toInt()
         val idLuis = usuarioIds[1].toInt()
         val idMarta = usuarioIds[2].toInt()
 
@@ -95,7 +95,7 @@ object DatosIniciales {
 
         val pedidosEjemplo = listOf(
             PedidoEjemplo(
-                usuarioId = idAna,
+                usuarioId = idNoe,
                 fechaRegistro = "2026-10-15",
                 fechaEntrega = "2026-10-16",
                 estado = "RECIBIDO",
@@ -105,7 +105,7 @@ object DatosIniciales {
                 detalles = listOf(Pair(idLavadoSecado, 3.0))
             ),
             PedidoEjemplo(
-                usuarioId = idAna,
+                usuarioId = idNoe,
                 fechaRegistro = "2026-10-14",
                 fechaEntrega = "2026-10-16",
                 estado = "EN_PROCESO",
@@ -115,7 +115,7 @@ object DatosIniciales {
                 detalles = listOf(Pair(idPlanchado, 5.0))
             ),
             PedidoEjemplo(
-                usuarioId = idAna,
+                usuarioId = idNoe,
                 fechaRegistro = "2026-10-12",
                 fechaEntrega = "2026-10-14",
                 estado = "LISTO",

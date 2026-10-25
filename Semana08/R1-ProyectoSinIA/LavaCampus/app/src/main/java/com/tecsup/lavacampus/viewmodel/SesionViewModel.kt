@@ -30,20 +30,8 @@ class SesionViewModel(
     init {
         viewModelScope.launch {
             preferenciasStore.rolSeleccionado.collect { rol ->
-                if (rol != null) {
+                if (rol != null && _uiState.value.usuario == null) {
                     _uiState.update { it.copy(rolSeleccionado = rol, perfilGuardado = rol) }
-                    if (_uiState.value.usuario == null) {
-                        val defaultEmail = if (rol == Rol.ADMIN) "admin@lavacampus.test" else "ana@correo.test"
-                        val defaultClave = if (rol == Rol.ADMIN) "admin" else "1234"
-                        try {
-                            val user = repository.login(defaultEmail, defaultClave)
-                            if (user != null) {
-                                _uiState.update { it.copy(usuario = user) }
-                            }
-                        } catch (e: Exception) {
-                            // ignore
-                        }
-                    }
                 }
             }
         }
@@ -51,9 +39,8 @@ class SesionViewModel(
 
     fun seleccionarRol(rol: Rol) {
         _uiState.update { it.copy(rolSeleccionado = rol, error = null) }
-        viewModelScope.launch {
-            preferenciasStore.setRolSeleccionado(rol)
-        }
+        // El selector de rol en LoginScreen solo actualiza el estado visual y de validación local.
+        // No persiste en DataStore ni ejecuta login automático.
     }
 
     fun onCorreoChanged(correo: String) {
@@ -115,7 +102,7 @@ class SesionViewModel(
     fun cambiarPerfil(nuevoRol: Rol) {
         viewModelScope.launch {
             preferenciasStore.setRolSeleccionado(nuevoRol)
-            val defaultEmail = if (nuevoRol == Rol.ADMIN) "admin@lavacampus.test" else "ana@correo.test"
+            val defaultEmail = if (nuevoRol == Rol.ADMIN) "admin@lavacampus.test" else "noe.escobal@tecsup.edu.pe"
             val defaultClave = if (nuevoRol == Rol.ADMIN) "admin" else "1234"
             try {
                 val user = repository.login(defaultEmail, defaultClave)

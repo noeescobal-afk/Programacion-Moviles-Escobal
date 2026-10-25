@@ -53,18 +53,19 @@ abstract class LavaDatabase : RoomDatabase() {
                     "lavacampus.db"
                 )
                     .addMigrations(MIGRATION_1_2)
-                    .addCallback(object : Callback() {
-                        override fun onCreate(db: SupportSQLiteDatabase) {
-                            super.onCreate(db)
-                            CoroutineScope(Dispatchers.IO).launch {
-                                INSTANCE?.let { database ->
-                                    DatosIniciales.sembrar(database)
-                                }
-                            }
-                        }
-                    })
                     .build()
                 INSTANCE = instance
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        if (instance.usuarioDao().contar() == 0) {
+                            DatosIniciales.sembrar(instance)
+                        }
+                    } catch (e: Exception) {
+                        // ignore
+                    }
+                }
+
                 instance
             }
         }
