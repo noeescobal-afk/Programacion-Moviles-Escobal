@@ -18,6 +18,28 @@ Durante el desarrollo se implementó:
 Prueba realizada:
 Se verificaron pedidos con fechas anteriores a la fecha actual que aparecieron identificados como `Atrasado` y ordenados con prioridad en la bandeja.
 
+### Corrección final del requisito
+Durante la revisión final se detectó que la primera implementación cubría correctamente la identificación visual, resaltado y priorización de pedidos atrasados en la Bandeja, pero todavía faltaba completar la parte del requisito que solicitaba contabilizarlos en el Panel del administrador.
+
+Esta corrección se implementó posteriormente mediante el commit:
+`fix: completa contador de pedidos atrasados`
+
+Flujo arquitectónico utilizado:
+`PedidoDao → LavaRepository → LavaRepositoryRoom → PanelViewModel → PanelScreen`
+
+- `PedidoDao` obtiene el conteo correspondiente mediante la consulta de conteo para fechas anteriores a hoy en estados activos;
+- `LavaRepository` declara la operación reactiva;
+- `LavaRepositoryRoom` implementa el acceso utilizando el DAO;
+- `PanelViewModel` incorpora la métrica en su estado mediante combinación de flujos (`combine`);
+- `PanelScreen` representa visualmente el indicador `Atrasados`;
+- no se modificó el esquema de Room porque no fue necesario agregar ni modificar entidades;
+- se mantuvo la arquitectura MVVM y la View no accede directamente al DAO ni al Repository.
+
+La definición final de atrasado aplicada comprende:
+- `fechaEntrega` anterior a la fecha actual;
+- estado `RECIBIDO`, `EN_PROCESO` o `LISTO`;
+- `ENTREGADO` y `CANCELADO` excluidos.
+
 ## 3. Mejora 2 — Descuento por volumen
 **Commit:** `ia: agrega descuento por volumen`
 
@@ -75,7 +97,7 @@ Durante el proceso se mantuvieron las siguientes decisiones arquitectónicas:
 El código generado por la IA no fue aceptado de forma ciega ni automática. Se realizó una revisión rigurosa de la arquitectura, persistencia, reglas de negocio, compilación y comportamiento visual.
 
 Ejemplos reales de intervenciones y correcciones manuales:
-1. **Pedidos atrasados**: corrección de la duplicación lógica inicial entre ViewModel y UI, centralizándola mediante la función de extensión `Pedido.esAtrasado()`.
+1. **Pedidos atrasados**: corrección de la duplicación lógica inicial entre ViewModel y UI, centralizándola mediante la función de extensión `Pedido.esAtrasado()`, además de completar la integración del contador de atrasados en el Panel del administrador detectada durante la revisión final.
 2. **Migración de base de datos**: rechazo del uso de `fallbackToDestructiveMigration` propuesto por la IA y su reemplazo por una migración explícita con `Migration(1, 2)` y `ALTER TABLE`.
 3. **Repetición de pedidos**: verificación estricta de que el flujo utilice los precios actuales del catálogo de servicios y que se respete el límite de tres pedidos activos al confirmar.
 
