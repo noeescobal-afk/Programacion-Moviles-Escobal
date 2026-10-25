@@ -224,10 +224,10 @@ fun PanelScreen(
                     }
                 }
 
-                // 4. ESTADOS DE PEDIDOS (MÉTRICAS)
+                // 4. ESTADOS DE PEDIDOS Y ALERTAS (MÉTRICAS)
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
-                        text = "Estados de pedidos",
+                        text = "Estados de pedidos y alertas",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -271,6 +271,12 @@ fun PanelScreen(
                             title = "Cancelados",
                             count = uiState.conteoCancelado,
                             indicatorColor = StatusCancelado,
+                            modifier = Modifier.weight(1f)
+                        )
+                        MetricCard(
+                            title = "Atrasados",
+                            count = uiState.conteoAtrasados,
+                            indicatorColor = StatusAtrasado,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -330,6 +336,7 @@ fun PanelScreen(
                             LeyendaItem(color = StatusListo, label = "Listos", count = uiState.conteoListo)
                             LeyendaItem(color = StatusEntregado, label = "Entregados", count = uiState.conteoEntregado)
                             LeyendaItem(color = StatusCancelado, label = "Cancelados", count = uiState.conteoCancelado)
+                            LeyendaItem(color = StatusAtrasado, label = "Atrasados", count = uiState.conteoAtrasados)
                         }
                     }
                 }

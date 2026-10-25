@@ -14,6 +14,7 @@ data class PanelUiState(
     val conteoListo: Int = 0,
     val conteoEntregado: Int = 0,
     val conteoCancelado: Int = 0,
+    val conteoAtrasados: Int = 0,
     val ingresosTotales: Double = 0.0,
     val ingresosPorServicio: List<IngresoServicio> = emptyList(),
     val cargando: Boolean = true
@@ -41,27 +42,34 @@ class PanelViewModel(
             val f5 = repository.observarCantidadPorEstado(EstadoPedido.CANCELADO)
             val f6 = repository.observarIngresosDesde(fechaInicio)
             val f7 = repository.observarIngresosPorServicio(fechaInicio)
+            val f8 = repository.observarCantidadAtrasados()
 
-            combine(f1, f2, f3) { r, e, l -> Triple(r, e, l) }
-                .combine(combine(f4, f5, f6) { ent, can, ing -> Triple(ent, can, ing) }) { t1, t2 ->
-                    t1 to t2
-                }
-                .combine(f7) { pair, servs ->
-                    val (t1, t2) = pair
-                    PanelUiState(
-                        conteoRecibido = t1.first,
-                        conteoEnProceso = t1.second,
-                        conteoListo = t1.third,
-                        conteoEntregado = t2.first,
-                        conteoCancelado = t2.second,
-                        ingresosTotales = t2.third,
-                        ingresosPorServicio = servs,
-                        cargando = false
-                    )
-                }
-                .collect { state ->
-                    _uiState.value = state
-                }
+            val flows = listOf(f1, f2, f3, f4, f5, f6, f7, f8)
+            combine(flows) { args ->
+                val r = args[0] as Int
+                val e = args[1] as Int
+                val l = args[2] as Int
+                val ent = args[3] as Int
+                val can = args[4] as Int
+                val ing = args[5] as Double
+                @Suppress("UNCHECKED_CAST")
+                val servs = args[6] as List<IngresoServicio>
+                val atrasados = args[7] as Int
+
+                PanelUiState(
+                    conteoRecibido = r,
+                    conteoEnProceso = e,
+                    conteoListo = l,
+                    conteoEntregado = ent,
+                    conteoCancelado = can,
+                    conteoAtrasados = atrasados,
+                    ingresosTotales = ing,
+                    ingresosPorServicio = servs,
+                    cargando = false
+                )
+            }.collect { state ->
+                _uiState.value = state
+            }
         }
     }
 }

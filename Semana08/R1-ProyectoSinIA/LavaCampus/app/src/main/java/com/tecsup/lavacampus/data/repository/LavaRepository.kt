@@ -85,4 +85,7 @@ interface LavaRepository {
     fun observarIngresosPorServicio(
         fechaInicio: String
     ): Flow<List<IngresoServicio>>
+
+    fun observarCantidadAtrasados():
+        Flow<Int>
 }

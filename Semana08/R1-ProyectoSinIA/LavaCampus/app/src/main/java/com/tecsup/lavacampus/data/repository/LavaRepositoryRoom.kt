@@ -216,4 +216,9 @@ class LavaRepositoryRoom(
     override fun observarIngresosPorServicio(fechaInicio: String): Flow<List<IngresoServicio>> {
         return detalleDao.observarIngresosPorServicio(fechaInicio)
     }
+
+    override fun observarCantidadAtrasados(): Flow<Int> {
+        val hoy = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+        return pedidoDao.contarAtrasados(hoy)
+    }
 }
