@@ -30,6 +30,11 @@ class MapaViewModel(private val ubicacionRepo: UbicacionRepository, private val 
     // Filtro derivado en el ViewModel para mantener la UI sin lógica de negocio.
     fun cambiarCategoria(valor: String) { _categoria.value=valor; _seleccionado.value=null }
     // Solicita una ubicación y publica estados observables.
+    private val _radio = MutableStateFlow(200)
+    val radio = _radio.asStateFlow()
+    // Limita el radio a los tres valores requeridos por la guía.
+    fun elegirRadio(n: Int) { require(n in listOf(100,200,500)); _radio.value=n }
+    // Solicita una ubicación y publica estados observables.
     fun buscar() {
         if(!ubicacionRepo.playServicesDisponible()) {
             _estado.value=UbicacionUi.Error("Este dispositivo no tiene Google Play Services",TipoError.SIN_PLAY_SERVICES)

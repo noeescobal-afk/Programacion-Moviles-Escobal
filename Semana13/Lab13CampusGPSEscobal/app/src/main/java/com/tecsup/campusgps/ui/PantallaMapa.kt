@@ -22,6 +22,7 @@ import com.tecsup.campusgps.model.UbicacionUi
     val lugares by vm.lugaresFiltrados.collectAsState()
     val todos by vm.lugares.collectAsState()
     val categoria by vm.categoria.collectAsState()
+    val radio by vm.radio.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val cercano by vm.masCercano.collectAsState()
     val contexto = LocalContext.current
@@ -36,13 +37,17 @@ import com.tecsup.campusgps.model.UbicacionUi
     }
     Scaffold(topBar = { TopAppBar(title = { Text("CampusGPS") }) }) { margen ->
         Column(Modifier.padding(margen).fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally) {
-            MapaUbicacion(estado,lugares,seleccionado,Modifier.weight(1f).fillMaxWidth())
+            MapaUbicacion(estado,lugares,seleccionado,radio,Modifier.weight(1f).fillMaxWidth())
             androidx.compose.foundation.lazy.LazyRow(horizontalArrangement=Arrangement.spacedBy(6.dp),contentPadding=PaddingValues(horizontal=8.dp)) {
                 items(5) { i ->
                     val cat = listOf("Todos","Estudio","Comida","Eventos","Servicios")[i]
                     FilterChip(selected=categoria==cat,onClick={vm.cambiarCategoria(cat)},label={Text(cat)})
                 }
             }
+            Row(horizontalArrangement=Arrangement.spacedBy(4.dp)) {
+                listOf(100,200,500).forEach { r -> FilterChip(selected=radio==r,onClick={vm.elegirRadio(r)},label={Text("${r} m")}) }
+            }
+            Text("Dentro del radio: ${lugares.count { (it.metros?:Float.MAX_VALUE)<=radio.toFloat() }} lugares")
             OutlinedButton(onClick={ cercano?.let { vm.seleccionar(it.id) } },enabled=cercano!=null) { Text("Ir al más cercano") }
             val primero = todos.firstOrNull { it.lugar.id==cercano?.id }
             if (primero!=null) Text("Más cercano: ${primero.lugar.nombre} (${primero.metros?.let { com.tecsup.campusgps.util.formatearDistancia(it) } ?: "Sin calcular"})")
