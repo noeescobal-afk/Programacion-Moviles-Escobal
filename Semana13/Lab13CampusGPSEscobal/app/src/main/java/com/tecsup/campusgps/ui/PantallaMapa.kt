@@ -34,6 +34,7 @@ import com.tecsup.campusgps.model.UbicacionUi
     Scaffold(topBar = { TopAppBar(title = { Text("CampusGPS") }) }) { margen ->
         Column(Modifier.padding(margen).fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally) {
             MapaUbicacion(estado,lugares,seleccionado,Modifier.weight(1f).fillMaxWidth())
+            ListaLugares(lugares,seleccionado,vm::seleccionar,Modifier.fillMaxWidth().height(220.dp))
             Button(onClick={ alPulsar() },enabled=estado !is UbicacionUi.Buscando) { Text("Obtener mi ubicación") }
             when(val e=estado) {
                 is UbicacionUi.Lista -> {Text("Latitud: ${e.posicion.latitud}");Text("Longitud: ${e.posicion.longitud}")}

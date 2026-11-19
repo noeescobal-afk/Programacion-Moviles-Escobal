@@ -31,5 +31,8 @@ class MapaViewModel(private val ubicacionRepo: UbicacionRepository, private val 
         Log.d("CampusGPS", "Distancias: ${_lugares.value}")
     }
     // El permiso negado se refleja en UI sin cerrar la actividad.
+    // La selección se comparte con el mapa y la lista de sitios.
+    fun seleccionar(id: Int?) { _seleccionado.value=id }
+    // El permiso negado se refleja en UI sin cerrar la actividad.
     fun permisoDenegado() { _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás") }
 }

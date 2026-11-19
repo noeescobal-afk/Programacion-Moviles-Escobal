@@ -14,6 +14,10 @@ import com.tecsup.campusgps.model.*
     val camara = rememberCameraPositionState { position=CameraPosition.fromLatLngZoom(LatLng(-12.0464,-77.0428),12f) }
     LaunchedEffect(estado) { if (estado is UbicacionUi.Lista) camara.animate(
         com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(LatLng(estado.posicion.latitud,estado.posicion.longitud),16f)) }
+    LaunchedEffect(seleccionado) {
+        val lugar = lugares.firstOrNull { it.lugar.id==seleccionado }?.lugar
+        if (lugar!=null) camara.animate(com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(LatLng(lugar.latitud,lugar.longitud),17f))
+    }
     GoogleMap(modifier=modifier,cameraPositionState=camara) {
         if (estado is UbicacionUi.Lista) Marker(state=rememberUpdatedMarkerState(position=LatLng(estado.posicion.latitud,estado.posicion.longitud)),title="Estás aquí")
         lugares.forEach { item ->
