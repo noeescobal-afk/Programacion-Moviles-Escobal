@@ -23,9 +23,13 @@ class MapaViewModel(private val ubicacionRepo: UbicacionRepository, private val 
         .stateIn(viewModelScope,SharingStarted.WhileSubscribed(5000),null)
     // Solicita una ubicación y publica estados observables.
     fun buscar() {
+        if(!ubicacionRepo.playServicesDisponible()) {
+            _estado.value=UbicacionUi.Error("Este dispositivo no tiene Google Play Services",TipoError.SIN_PLAY_SERVICES)
+            return
+        }
         _estado.value = UbicacionUi.Buscando
         viewModelScope.launch { ubicacionRepo.obtenerPosicion().onSuccess { _estado.value = UbicacionUi.Lista(it); actualizarDistancias(it) }
-          .onFailure { _estado.value = UbicacionUi.Error(it.message ?: "No se pudo obtener la ubicación") } }
+          .onFailure { _estado.value = UbicacionUi.Error(if(it is SecurityException) "Falta el permiso de ubicación" else "Activa el GPS e intenta de nuevo", if(it is SecurityException) TipoError.SIN_PERMISO else TipoError.GPS_APAGADO) } }
     }
     // El permiso negado se refleja en UI sin cerrar la actividad.
     // Calcula distancias fuera de Compose y ordena por proximidad.
@@ -37,5 +41,5 @@ class MapaViewModel(private val ubicacionRepo: UbicacionRepository, private val 
     // La selección se comparte con el mapa y la lista de sitios.
     fun seleccionar(id: Int?) { _seleccionado.value=id }
     // El permiso negado se refleja en UI sin cerrar la actividad.
-    fun permisoDenegado() { _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás") }
+    fun permisoDenegado() { _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás",TipoError.SIN_PERMISO) }
 }

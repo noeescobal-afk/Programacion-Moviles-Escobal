@@ -42,7 +42,7 @@ import com.tecsup.campusgps.model.UbicacionUi
             Button(onClick={ alPulsar() },enabled=estado !is UbicacionUi.Buscando) { Text("Obtener mi ubicación") }
             when(val e=estado) {
                 is UbicacionUi.Lista -> {Text("Latitud: ${e.posicion.latitud}");Text("Longitud: ${e.posicion.longitud}")}
-                is UbicacionUi.Error -> Text(e.mensaje, color=MaterialTheme.colorScheme.error)
+                is UbicacionUi.Error -> MensajeError(e,::alPulsar)
                 UbicacionUi.Buscando -> CircularProgressIndicator()
                 else -> Text("Sin posición")
             }
