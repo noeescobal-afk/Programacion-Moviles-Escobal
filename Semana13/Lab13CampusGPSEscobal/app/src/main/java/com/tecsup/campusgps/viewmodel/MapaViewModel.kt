@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.campusgps.data.*
 import com.tecsup.campusgps.model.*
+import com.tecsup.campusgps.util.distanciaMetros
+import android.util.Log
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 class MapaViewModel(private val ubicacionRepo: UbicacionRepository, private val lugaresRepo: LugaresRepository): ViewModel() {
@@ -19,8 +21,14 @@ class MapaViewModel(private val ubicacionRepo: UbicacionRepository, private val 
     // Solicita una ubicación y publica estados observables.
     fun buscar() {
         _estado.value = UbicacionUi.Buscando
-        viewModelScope.launch { ubicacionRepo.obtenerPosicion().onSuccess { _estado.value = UbicacionUi.Lista(it) }
+        viewModelScope.launch { ubicacionRepo.obtenerPosicion().onSuccess { _estado.value = UbicacionUi.Lista(it); actualizarDistancias(it) }
           .onFailure { _estado.value = UbicacionUi.Error(it.message ?: "No se pudo obtener la ubicación") } }
+    }
+    // El permiso negado se refleja en UI sin cerrar la actividad.
+    // Calcula distancias fuera de Compose y ordena por proximidad.
+    private fun actualizarDistancias(posicion: Posicion) {
+        _lugares.value = lugaresRepo.obtenerLugares().map { LugarConDistancia(it, distanciaMetros(posicion,it)) }.sortedBy { it.metros }
+        Log.d("CampusGPS", "Distancias: ${_lugares.value}")
     }
     // El permiso negado se refleja en UI sin cerrar la actividad.
     fun permisoDenegado() { _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás") }
