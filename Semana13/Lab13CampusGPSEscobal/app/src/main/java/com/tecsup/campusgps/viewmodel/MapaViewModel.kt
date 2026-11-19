@@ -19,8 +19,16 @@ class MapaViewModel(private val ubicacionRepo: UbicacionRepository, private val 
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado = _seleccionado.asStateFlow()
     // Solicita una ubicación y publica estados observables.
-    val masCercano: StateFlow<Lugar?> = lugares.map { lista -> lista.firstOrNull { it.metros!=null }?.lugar }
+    // Solicita una ubicación y publica estados observables.
+    private val _categoria = MutableStateFlow("Todos")
+    val categoria = _categoria.asStateFlow()
+    val lugaresFiltrados: StateFlow<List<LugarConDistancia>> = combine(_lugares,_categoria) { lista,cat ->
+        if(cat=="Todos") lista else lista.filter { it.lugar.categoria==cat }
+    }.stateIn(viewModelScope,SharingStarted.WhileSubscribed(5000),_lugares.value)
+    val masCercano: StateFlow<Lugar?> = lugaresFiltrados.map { lista -> lista.firstOrNull { it.metros!=null }?.lugar }
         .stateIn(viewModelScope,SharingStarted.WhileSubscribed(5000),null)
+    // Filtro derivado en el ViewModel para mantener la UI sin lógica de negocio.
+    fun cambiarCategoria(valor: String) { _categoria.value=valor; _seleccionado.value=null }
     // Solicita una ubicación y publica estados observables.
     fun buscar() {
         if(!ubicacionRepo.playServicesDisponible()) {
