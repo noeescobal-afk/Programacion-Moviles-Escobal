@@ -3,6 +3,8 @@ package com.tecsup.campusgps.ui
 // ARCHIVO: MapaUbicacion.kt
 // Mapa visual: administra la cámara y dibuja marcadores; no consulta los repositorios.
 import androidx.compose.runtime.*
+import androidx.compose.foundation.isSystemInDarkTheme
+import com.google.android.gms.maps.model.MapStyleOptions
 import androidx.compose.ui.Modifier
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -19,7 +21,9 @@ import com.tecsup.campusgps.model.*
         if (lugar!=null) camara.animate(com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(LatLng(lugar.latitud,lugar.longitud),17f))
     }
     val cercano = lugares.firstOrNull { it.metros!=null }?.lugar?.id
-    GoogleMap(modifier=modifier,cameraPositionState=camara) {
+    val oscuro = isSystemInDarkTheme()
+    val estilo = remember(oscuro) { if(oscuro) MapStyleOptions("""[{"elementType":"geometry","stylers":[{"color":"#242f3e"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#aebad0"}]},{"featureType":"road","elementType":"geometry","stylers":[{"color":"#38465a"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#17263c"}]}]""") else null }
+    GoogleMap(modifier=modifier,cameraPositionState=camara,properties=MapProperties(mapStyleOptions=estilo)) {
         if(estado is UbicacionUi.Lista) Circle(center=LatLng(estado.posicion.latitud,estado.posicion.longitud),radius=radio.toDouble(),
             strokeColor=android.graphics.Color.rgb(0,108,198),fillColor=android.graphics.Color.argb(32,0,108,198),strokeWidth=3f)
 
