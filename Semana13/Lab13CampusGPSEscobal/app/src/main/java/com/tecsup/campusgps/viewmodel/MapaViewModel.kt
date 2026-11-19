@@ -19,6 +19,9 @@ class MapaViewModel(private val ubicacionRepo: UbicacionRepository, private val 
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado = _seleccionado.asStateFlow()
     // Solicita una ubicación y publica estados observables.
+    val masCercano: StateFlow<Lugar?> = lugares.map { lista -> lista.firstOrNull { it.metros!=null }?.lugar }
+        .stateIn(viewModelScope,SharingStarted.WhileSubscribed(5000),null)
+    // Solicita una ubicación y publica estados observables.
     fun buscar() {
         _estado.value = UbicacionUi.Buscando
         viewModelScope.launch { ubicacionRepo.obtenerPosicion().onSuccess { _estado.value = UbicacionUi.Lista(it); actualizarDistancias(it) }

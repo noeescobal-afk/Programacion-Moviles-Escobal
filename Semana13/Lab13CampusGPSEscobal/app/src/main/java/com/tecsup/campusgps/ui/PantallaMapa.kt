@@ -21,6 +21,7 @@ import com.tecsup.campusgps.model.UbicacionUi
     val estado by vm.estado.collectAsState()
     val lugares by vm.lugares.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
+    val cercano by vm.masCercano.collectAsState()
     val contexto = LocalContext.current
     // Android dibuja el diálogo; aquí se maneja su resultado.
     val lanzador = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permisos ->
@@ -34,6 +35,9 @@ import com.tecsup.campusgps.model.UbicacionUi
     Scaffold(topBar = { TopAppBar(title = { Text("CampusGPS") }) }) { margen ->
         Column(Modifier.padding(margen).fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally) {
             MapaUbicacion(estado,lugares,seleccionado,Modifier.weight(1f).fillMaxWidth())
+            OutlinedButton(onClick={ cercano?.let { vm.seleccionar(it.id) } },enabled=cercano!=null) { Text("Ir al más cercano") }
+            val primero = lugares.firstOrNull { it.lugar.id==cercano?.id }
+            if (primero!=null) Text("Más cercano: ${primero.lugar.nombre} (${primero.metros?.let { com.tecsup.campusgps.util.formatearDistancia(it) } ?: "Sin calcular"})")
             ListaLugares(lugares,seleccionado,vm::seleccionar,Modifier.fillMaxWidth().height(220.dp))
             Button(onClick={ alPulsar() },enabled=estado !is UbicacionUi.Buscando) { Text("Obtener mi ubicación") }
             when(val e=estado) {

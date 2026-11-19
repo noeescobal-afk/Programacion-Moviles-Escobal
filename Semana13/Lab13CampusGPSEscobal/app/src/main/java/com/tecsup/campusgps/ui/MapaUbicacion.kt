@@ -18,13 +18,14 @@ import com.tecsup.campusgps.model.*
         val lugar = lugares.firstOrNull { it.lugar.id==seleccionado }?.lugar
         if (lugar!=null) camara.animate(com.google.android.gms.maps.CameraUpdateFactory.newLatLngZoom(LatLng(lugar.latitud,lugar.longitud),17f))
     }
+    val cercano = lugares.firstOrNull { it.metros!=null }?.lugar?.id
     GoogleMap(modifier=modifier,cameraPositionState=camara) {
         if (estado is UbicacionUi.Lista) Marker(state=rememberUpdatedMarkerState(position=LatLng(estado.posicion.latitud,estado.posicion.longitud)),title="Estás aquí")
         lugares.forEach { item ->
             key(item.lugar.id) {
                 Marker(state=rememberUpdatedMarkerState(position=LatLng(item.lugar.latitud,item.lugar.longitud)),
                     title=item.lugar.nombre,snippet=item.lugar.categoria,
-                    icon=BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                    icon=BitmapDescriptorFactory.defaultMarker(if(item.lugar.id==cercano) BitmapDescriptorFactory.HUE_GREEN else BitmapDescriptorFactory.HUE_AZURE))
             }
         }
     }
