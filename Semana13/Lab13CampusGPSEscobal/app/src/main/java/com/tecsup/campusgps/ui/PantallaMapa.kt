@@ -19,6 +19,8 @@ import com.tecsup.campusgps.model.UbicacionUi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
+    val lugares by vm.lugares.collectAsState()
+    val seleccionado by vm.seleccionado.collectAsState()
     val contexto = LocalContext.current
     // Android dibuja el diálogo; aquí se maneja su resultado.
     val lanzador = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permisos ->
@@ -30,7 +32,8 @@ import com.tecsup.campusgps.model.UbicacionUi
         if (aceptado) vm.buscar() else lanzador.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION))
     }
     Scaffold(topBar = { TopAppBar(title = { Text("CampusGPS") }) }) { margen ->
-        Column(Modifier.padding(margen).fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Column(Modifier.padding(margen).fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally) {
+            MapaUbicacion(estado,lugares,seleccionado,Modifier.weight(1f).fillMaxWidth())
             Button(onClick={ alPulsar() },enabled=estado !is UbicacionUi.Buscando) { Text("Obtener mi ubicación") }
             when(val e=estado) {
                 is UbicacionUi.Lista -> {Text("Latitud: ${e.posicion.latitud}");Text("Longitud: ${e.posicion.longitud}")}
