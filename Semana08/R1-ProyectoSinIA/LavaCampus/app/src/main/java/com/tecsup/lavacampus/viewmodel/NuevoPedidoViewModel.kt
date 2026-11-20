@@ -6,6 +6,7 @@ import com.tecsup.lavacampus.data.local.entity.Servicio
 import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.LineaPedido
+import com.tecsup.lavacampus.model.Unidad
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -25,14 +26,15 @@ data class NuevoPedidoUiState(
 
 class NuevoPedidoViewModel(
     private val repository: LavaRepository,
-    private val preferenciasStore: PreferenciasStore
+    private val preferenciasStore: PreferenciasStore,
+    private val repetirPedidoId: Int? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NuevoPedidoUiState())
     val uiState: StateFlow<NuevoPedidoUiState> = _uiState.asStateFlow()
 
     init {
-        observarServicios()
+        observarServiciosYPrecargar()
         viewModelScope.launch {
             preferenciasStore.recibirPedidos.collect { activo ->
                 _uiState.update { it.copy(recibirPedidos = activo) }
@@ -40,12 +42,39 @@ class NuevoPedidoViewModel(
         }
     }
 
-    private fun observarServicios() {
+    private fun observarServiciosYPrecargar() {
         viewModelScope.launch {
             repository.observarServiciosActivos()
                 .catch { e -> _uiState.update { it.copy(cargando = false, error = e.message) } }
-                .collect { lista ->
-                    _uiState.update { it.copy(servicios = lista, cargando = false) }
+                .collect { listaServiciosActivos ->
+                    val initialCantidades = mutableMapOf<Int, Double>()
+                    var avisoInactivos = false
+
+                    if (repetirPedidoId != null && _uiState.value.cargando) {
+                        try {
+                            val pedidoOriginal = repository.observarPedido(repetirPedidoId).filterNotNull().first()
+                            for (detalleServ in pedidoOriginal.detalles) {
+                                val servId = detalleServ.servicio.id
+                                val servicioActual = listaServiciosActivos.find { it.id == servId }
+                                if (servicioActual != null && servicioActual.activo) {
+                                    initialCantidades[servId] = detalleServ.detalle.cantidad
+                                } else {
+                                    avisoInactivos = true
+                                }
+                            }
+                        } catch (e: Exception) {
+                            // ignore
+                        }
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            servicios = listaServiciosActivos,
+                            cantidades = if (initialCantidades.isNotEmpty() && it.cantidades.isEmpty()) initialCantidades else it.cantidades,
+                            cargando = false,
+                            error = if (avisoInactivos && it.error == null) "Algunos servicios del pedido anterior ya no están disponibles y no fueron incluidos." else it.error
+                        )
+                    }
                 }
         }
     }
@@ -66,7 +95,7 @@ class NuevoPedidoViewModel(
         _uiState.update { it.copy(nota = nota, error = null) }
     }
 
-    val totalEstimado: Double
+    val subtotalEstimado: Double
         get() {
             val state = _uiState.value
             return state.cantidades.entries.sumOf { (servId, cant) ->
@@ -75,6 +104,21 @@ class NuevoPedidoViewModel(
                 cant * precio
             }
         }
+
+    val descuentoEstimado: Double
+        get() {
+            val state = _uiState.value
+            val servicioLavado = state.servicios.find { it.unidad == Unidad.KG.name }
+            val kgLavado = servicioLavado?.let { state.cantidades[it.id] } ?: 0.0
+            if (kgLavado > 5.0 && servicioLavado != null) {
+                val subtotalLavado = kgLavado * servicioLavado.precio
+                return subtotalLavado * 0.10
+            }
+            return 0.0
+        }
+
+    val totalEstimado: Double
+        get() = (subtotalEstimado - descuentoEstimado).coerceAtLeast(0.0)
 
     val fechaEstimadaEntrega: String
         get() {

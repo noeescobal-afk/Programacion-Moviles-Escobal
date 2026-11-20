@@ -1,5 +1,13 @@
 package com.tecsup.productos.ui.navigation
 
+<<<<<<< HEAD
+=======
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+>>>>>>> origin/mejora-ia
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -48,11 +56,27 @@ fun AppNav(contenedor: AppContainer, modifier: Modifier = Modifier) {
     val esAdmin = sesion.rol == Rol.ADMIN
     key(sesion.uid, sesion.rol) {
         val navController = rememberNavController()
+<<<<<<< HEAD
     
         NavHost(
             navController = navController,
             startDestination = CATALOGO,
             modifier = modifier
+=======
+
+        NavHost(
+            navController = navController,
+            startDestination = CATALOGO,
+            modifier = modifier,
+            enterTransition = {
+                fadeIn(tween(240)) + slideInHorizontally(tween(280)) { it / 9 }
+            },
+            exitTransition = { fadeOut(tween(150)) },
+            popEnterTransition = { fadeIn(tween(210)) },
+            popExitTransition = {
+                fadeOut(tween(160)) + slideOutHorizontally(tween(210)) { it / 9 }
+            }
+>>>>>>> origin/mejora-ia
         ) {
             composable(CATALOGO) {
                 val listaViewModel: ListaViewModel = viewModel(factory = contenedor.listaFactory)

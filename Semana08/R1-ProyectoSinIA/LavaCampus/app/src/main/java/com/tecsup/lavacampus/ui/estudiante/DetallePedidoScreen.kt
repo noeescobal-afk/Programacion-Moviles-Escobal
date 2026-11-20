@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.tecsup.lavacampus.model.EstadoPedido
 import com.tecsup.lavacampus.model.Unidad
 import com.tecsup.lavacampus.ui.components.AppTopBar
+import com.tecsup.lavacampus.ui.components.DestructiveButton
 import com.tecsup.lavacampus.ui.components.EstadoPedidoChip
 import com.tecsup.lavacampus.ui.components.IconoServicio
 import com.tecsup.lavacampus.ui.components.StepperEstado
@@ -24,13 +26,15 @@ import java.util.Locale
 @Composable
 fun DetallePedidoScreen(
     viewModel: DetallePedidoViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onRepetirPedido: (Int) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pedidoConDetalle = uiState.pedidoConDetalle
     val pedido = pedidoConDetalle?.pedido
 
     var showCancelDialog by remember { mutableStateOf(false) }
+    var showRepeatDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -202,7 +206,7 @@ fun DetallePedidoScreen(
                                     val cantStr = if (servicio.unidad == Unidad.KG.name) {
                                         String.format(Locale.getDefault(), "%.1f kg", detalle.cantidad)
                                     } else {
-                                        "${detalle.cantidad.toInt()} ${if (detalle.cantidad == 1.0) "unidad" else "unidades"}"
+                                        "${detalle.cantidad.toInt()} unidades"
                                     }
                                     Text(
                                         text = "$cantStr • S/ ${String.format(Locale.getDefault(), "%.2f", detalle.precioUnitario)} c/u",
@@ -224,13 +228,25 @@ fun DetallePedidoScreen(
 
                         HorizontalDivider()
 
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Subtotal:")
+                            Text("S/ ${String.format(Locale.getDefault(), "%.2f", pedido.total + pedido.descuento)}")
+                        }
+
+                        if (pedido.descuento > 0.0) {
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Descuento por volumen (-10%):", color = MaterialTheme.colorScheme.primary)
+                                Text("-S/ ${String.format(Locale.getDefault(), "%.2f", pedido.descuento)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                            }
+                        }
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Total:",
+                                text = "Total final:",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -253,18 +269,23 @@ fun DetallePedidoScreen(
                     )
                 }
 
+                Spacer(modifier = Modifier.height(4.dp))
+                Button(
+                    onClick = { showRepeatDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(text = "Repetir pedido")
+                }
+
                 if (esRecibido) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
+                    Spacer(modifier = Modifier.height(4.dp))
+                    DestructiveButton(
+                        text = if (uiState.cancelando) "Cancelando..." else "Cancelar pedido",
                         onClick = { showCancelDialog = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        ),
-                        enabled = !uiState.cancelando
-                    ) {
-                        Text(text = if (uiState.cancelando) "Cancelando..." else "Cancelar pedido")
-                    }
+                        enabled = !uiState.cancelando,
+                        icon = { Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(20.dp)) }
+                    )
                 }
             }
         }
@@ -279,9 +300,7 @@ fun DetallePedidoScreen(
                 TextButton(
                     onClick = {
                         showCancelDialog = false
-                        viewModel.cancelarPedido(onSuccess = {
-                            // Cierra o se actualiza automáticamente via flow
-                        })
+                        viewModel.cancelarPedido(onSuccess = onBack)
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
@@ -291,6 +310,29 @@ fun DetallePedidoScreen(
             dismissButton = {
                 TextButton(onClick = { showCancelDialog = false }) {
                     Text("Volver")
+                }
+            }
+        )
+    }
+
+    if (showRepeatDialog) {
+        AlertDialog(
+            onDismissRequest = { showRepeatDialog = false },
+            title = { Text("¿Repetir pedido?") },
+            text = { Text("¿Deseas utilizar los servicios y cantidades de este pedido como base para un nuevo pedido?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showRepeatDialog = false
+                        pedido?.let { onRepetirPedido(it.id) }
+                    }
+                ) {
+                    Text("Continuar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRepeatDialog = false }) {
+                    Text("Cancelar")
                 }
             }
         )

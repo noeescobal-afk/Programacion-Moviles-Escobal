@@ -58,17 +58,34 @@ class ListaViewModel(
                     notificador.mostrar("Datos actualizados", "Se guardaron $cantidad elementos")
                 }
                 val error = resultado.exceptionOrNull()
+<<<<<<< HEAD
                 repositorio.items.collect { lista ->
                     if (error != null && lista.isEmpty()) {
                         _estado.value = UiState.Error(
                             error.message ?: "No se pudo descargar el catálogo y no hay datos guardados."
+=======
+                if (error is CancellationException) throw error
+                val sinConexion = error is IOException || error?.cause is IOException
+                repositorio.items.collect { lista ->
+                    if (error != null && lista.isEmpty()) {
+                        _estado.value = UiState.Error(
+                            if (sinConexion) {
+                                "Revisa tu conexión. Aún no hay productos guardados en este dispositivo."
+                            } else {
+                                "No se pudo actualizar el catálogo. Vuelve a intentarlo."
+                            }
+>>>>>>> origin/mejora-ia
                         )
                         _aviso.value = null
                     } else {
                         _estado.value = UiState.Exito(lista)
                         _aviso.value = when {
                             error == null -> null
+<<<<<<< HEAD
                             error is IOException || error.cause is IOException ->
+=======
+                            sinConexion ->
+>>>>>>> origin/mejora-ia
                                 "Sin conexión. Mostrando productos guardados."
                             else -> "No se pudo actualizar. Mostrando productos guardados."
                         }

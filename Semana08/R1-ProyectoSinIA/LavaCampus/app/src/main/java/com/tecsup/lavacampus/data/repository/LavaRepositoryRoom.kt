@@ -64,6 +64,27 @@ class LavaRepositoryRoom(
         return detalleDao.contarPorServicio(id) > 0
     }
 
+    private fun validarCantidad(unidad: String, cantidad: Double) {
+        if (cantidad <= 0.0) {
+            throw IllegalArgumentException("La cantidad debe ser mayor a 0")
+        }
+        if (unidad == Unidad.KG.name) {
+            if (cantidad < 1.0 || cantidad > 10.0) {
+                throw IllegalArgumentException("La cantidad en KG debe estar entre 1.0 y 10.0")
+            }
+            if (Math.round(cantidad * 10) % 5 != 0L) {
+                throw IllegalArgumentException("La cantidad en KG debe ir en incrementos de 0.5")
+            }
+        } else {
+            if (cantidad < 1.0 || cantidad > 30.0) {
+                throw IllegalArgumentException("La cantidad por unidad/prenda debe estar entre 1 y 30")
+            }
+            if (cantidad % 1.0 != 0.0) {
+                throw IllegalArgumentException("La cantidad por unidad/prenda debe ser un número entero")
+            }
+        }
+    }
+
     // PEDIDOS
     override suspend fun crearPedido(usuarioId: Int, lineas: List<LineaPedido>, nota: String): Long {
         if (lineas.isEmpty()) {
@@ -82,6 +103,8 @@ class LavaRepositoryRoom(
         val fechaRegistroStr = LocalDate.now().format(formatter)
 
         var maxHoras = 0
+        var subtotalTotal = 0.0
+        var subtotalLavado = 0.0
         val detallesData = mutableListOf<Triple<Int, Double, Double>>().apply {
             for (linea in lineas) {
                 val servicio = servicioDao.obtener(linea.servicioId)
@@ -96,6 +119,12 @@ class LavaRepositoryRoom(
                 }
 
                 val precioActual = servicio.precio
+                val sub = linea.cantidad * precioActual
+                subtotalTotal += sub
+                if (servicio.unidad == Unidad.KG.name) {
+                    subtotalLavado += sub
+                }
+
                 add(Triple(servicio.id, linea.cantidad, precioActual))
             }
         }
@@ -107,10 +136,13 @@ class LavaRepositoryRoom(
         }
         val fechaEntregaStr = fechaEntregaDate.format(formatter)
 
-        var totalPedido = 0.0
-        for ((_, cant, precio) in detallesData) {
-            totalPedido += cant * precio
+        val kgLavadoTotal = lineas.sumOf { linea ->
+            val servicio = servicioDao.obtener(linea.servicioId)
+            if (servicio?.unidad == Unidad.KG.name) linea.cantidad else 0.0
         }
+
+        val descuento = if (kgLavadoTotal > 5.0) subtotalLavado * 0.10 else 0.0
+        val totalFinal = (subtotalTotal - descuento).coerceAtLeast(0.0)
 
         return database.withTransaction {
             val pedido = Pedido(
@@ -118,7 +150,8 @@ class LavaRepositoryRoom(
                 fechaRegistro = fechaRegistroStr,
                 fechaEntrega = fechaEntregaStr,
                 estado = EstadoPedido.RECIBIDO.name,
-                total = totalPedido,
+                total = totalFinal,
+                descuento = descuento,
                 casillero = null,
                 pagado = false,
                 nota = nota,
@@ -160,11 +193,14 @@ class LavaRepositoryRoom(
         pedidoDao.actualizarPagado(id, pagado)
     }
 
+    suspend fun cancelarPedido(id: Int) {
+        pedidoDao.actualizarEstado(id, EstadoPedido.CANCELADO.name, null)
+    }
+
     override fun observarCasillerosOcupados(): Flow<List<String>> {
         return pedidoDao.observarCasillerosOcupados()
     }
 
-    // PANEL
     override fun observarPedidosDeFecha(fecha: String): Flow<Int> {
         return pedidoDao.contarPorFecha(fecha)
     }
@@ -181,29 +217,8 @@ class LavaRepositoryRoom(
         return detalleDao.observarIngresosPorServicio(fechaInicio)
     }
 
-    private fun validarCantidad(unidadStr: String, cantidad: Double) {
-        val unidad = try {
-            Unidad.valueOf(unidadStr)
-        } catch (e: Exception) {
-            throw IllegalArgumentException("Unidad desconocida: $unidadStr")
-        }
-        when (unidad) {
-            Unidad.KG -> {
-                if (cantidad < 1.0 || cantidad > 10.0) {
-                    throw IllegalArgumentException("La cantidad para KG debe estar entre 1.0 y 10.0")
-                }
-                if ((cantidad * 2) % 1.0 != 0.0) {
-                    throw IllegalArgumentException("La cantidad para KG debe ser en incrementos de 0.5")
-                }
-            }
-            Unidad.PRENDA, Unidad.UNIDAD -> {
-                if (cantidad < 1.0 || cantidad > 30.0) {
-                    throw IllegalArgumentException("La cantidad para ${unidad.name} debe estar entre 1 y 30")
-                }
-                if (cantidad % 1.0 != 0.0) {
-                    throw IllegalArgumentException("La cantidad para ${unidad.name} debe ser un valor entero")
-                }
-            }
-        }
+    override fun observarCantidadAtrasados(): Flow<Int> {
+        val hoy = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+        return pedidoDao.contarAtrasados(hoy)
     }
 }

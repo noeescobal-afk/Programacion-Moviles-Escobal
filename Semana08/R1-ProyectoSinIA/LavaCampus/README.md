@@ -5,7 +5,7 @@ Aplicación móvil para la gestión de una lavandería universitaria, desarrolla
 **Autor:** Noe Oswaldo Escobal Huayana  
 **Curso:** Programación en Móviles  
 **Institución:** TECSUP  
-**Proyecto:** Laboratorio MVVM + Room - LavaCampus SIN IA
+**Proyecto:** Laboratorio MVVM + Room - LavaCampus
 
 ---
 
@@ -13,13 +13,15 @@ Aplicación móvil para la gestión de una lavandería universitaria, desarrolla
 
 LavaCampus es una aplicación Android desarrollada con Kotlin y Jetpack Compose que permite gestionar el servicio de lavandería de un campus universitario.
 
+El proyecto contiene una implementación base y una segunda fase de mejoras avanzadas asistidas por IA (descuento por volumen, repetición de pedidos, detección y conteo de pedidos atrasados y rediseño visual boutique), detalladas en `PROMPTS.md`.
+
 La aplicación cuenta con dos perfiles: **Estudiante** y **Administrador**.
 
-El estudiante puede iniciar sesión, consultar sus pedidos, registrar nuevos pedidos de lavandería, revisar tarifas, realizar seguimiento del estado de sus pedidos y administrar algunas preferencias de su perfil.
+El estudiante puede iniciar sesión, consultar sus pedidos, registrar nuevos pedidos de lavandería con descuento por volumen, repetir pedidos anteriores, revisar tarifas, realizar seguimiento del estado de sus pedidos y administrar preferencias de su perfil.
 
-El administrador dispone de un panel general, gestión de pedidos, servicios y clientes, además de opciones para controlar la recepción de nuevos pedidos y otras preferencias de la aplicación.
+El administrador dispone de un panel general con contador de pedidos atrasados, gestión de pedidos (con identificación visual de atrasos), servicios y clientes (con avatares fotográficos), además de opciones para controlar la recepción de nuevos pedidos.
 
-La información se almacena localmente mediante Room y las preferencias de la aplicación se mantienen utilizando DataStore.
+La información se almacena localmente mediante Room (esquema versión 2 con migración explícita) y las preferencias de la aplicación se mantienen utilizando DataStore.
 
 ---
 
@@ -32,35 +34,38 @@ La información se almacena localmente mediante Room y las preferencias de la ap
 - Consultar los últimos pedidos realizados.
 - Registrar un nuevo pedido.
 - Seleccionar servicios y cantidades.
-- Calcular automáticamente el total del pedido.
+- Aplicación de un **10% de descuento por volumen** cuando el servicio de "Lavado y secado" supera estrictamente los 5 kg (calculado sobre el subtotal del lavado).
+- Calcular automáticamente el total del pedido con desglose de subtotal, descuento y total final.
 - Calcular la fecha estimada de entrega.
 - Consultar el detalle de un pedido.
+- Repetir un pedido anterior desde su detalle, precargando servicios activos con precios actuales para su revisión previa a la confirmación.
 - Cancelar pedidos que todavía se encuentren en estado `RECIBIDO`.
 - Consultar el historial de pedidos.
 - Consultar las tarifas de los servicios activos.
-- Visualizar información y estadísticas del perfil.
+- Visualizar información y estadísticas del perfil (con fotografía dinámica de cliente).
 - Activar o desactivar el modo oscuro.
 - Configurar avisos y notificaciones.
-- Cambiar al perfil de administrador.
+- Cambiar al perfil de administrador (regresando al Login para autenticar).
 - Cerrar sesión.
 
 ### Perfil Administrador
 
-- Visualizar un panel con indicadores generales.
+- Visualizar un panel con indicadores generales, ingresos pagados y contador de pedidos atrasados.
 - Consultar pedidos de todos los estudiantes.
 - Buscar y filtrar pedidos.
+- Identificar visualmente y priorizar pedidos atrasados en la Bandeja.
 - Avanzar pedidos entre sus diferentes estados.
 - Asignar casilleros disponibles.
 - Registrar el pago de un pedido.
-- Gestionar los servicios de lavandería.
+- Gestionar los servicios de lavandería con soporte fotográfico.
 - Crear y editar servicios.
 - Desactivar servicios utilizados anteriormente.
-- Consultar la lista de clientes.
+- Consultar la lista de clientes con avatares fotográficos.
 - Buscar clientes por nombre o código.
 - Consultar cantidad de pedidos y gasto por cliente.
 - Activar o desactivar la recepción de nuevos pedidos.
 - Configurar modo oscuro y notificaciones.
-- Cambiar al perfil de estudiante.
+- Cambiar al perfil de estudiante (regresando al Login).
 - Cerrar sesión.
 
 ---
@@ -86,8 +91,6 @@ La información se almacena localmente mediante Room y las preferencias de la ap
 - Room: `2.7.2`
 - JVM: `21`
 - minSdk: `26`
-
-> Se utilizó Room 2.7.2 debido a compatibilidad con la versión de Kotlin/KSP empleada por el proyecto. Con Room 2.6.1 se producía un error durante `kspDebugKotlin`, mientras que con Room 2.7.2 el proyecto compila correctamente.
 
 ---
 
@@ -121,10 +124,6 @@ El proyecto utiliza el patrón **MVVM (Model - View - ViewModel)**.
 │ lavacampus.db    │ │   Preferencias   │
 └──────────────────┘ └──────────────────┘
 ```
-
-Las pantallas de Jetpack Compose representan la vista. Los ViewModels administran el estado y contienen las reglas de negocio. El repositorio funciona como intermediario entre los ViewModels y las fuentes de datos.
-
-Room se utiliza para la información principal de la lavandería y DataStore para conservar preferencias de la aplicación.
 
 ---
 
@@ -162,106 +161,34 @@ com.tecsup.lavacampus
 │   └── repository
 │       ├── LavaRepository.kt
 │       └── LavaRepositoryRoom.kt
-│
-├── model
-│   ├── Casilleros.kt
-│   ├── ClienteResumen.kt
-│   ├── EstadoPedido.kt
-│   ├── IngresoServicio.kt
-│   ├── LineaPedido.kt
-│   ├── Rol.kt
-│   └── Unidad.kt
-│
-├── ui
-│   ├── admin
-│   │   ├── AjustesScreen.kt
-│   │   ├── BandejaScreen.kt
-│   │   ├── ClientesScreen.kt
-│   │   ├── FormularioServicioScreen.kt
-│   │   ├── GestionPedidoScreen.kt
-│   │   ├── PanelScreen.kt
-│   │   └── ServiciosScreen.kt
-│   │
-│   ├── components
-│   │   ├── AdminBottomBar.kt
-│   │   ├── AppTopBar.kt
-│   │   ├── EstadoPedidoChip.kt
-│   │   ├── IconoServicio.kt
-│   │   ├── LavaButton.kt
-│   │   ├── PedidoCard.kt
-│   │   ├── SelectorCantidad.kt
-│   │   ├── SplashScreen.kt
-│   │   ├── StepperEstado.kt
-│   │   ├── StudentBottomBar.kt
-│   │   │
-│   │   └── graficos
-│   │       ├── GraficoBarras.kt
-│   │       └── GraficoDona.kt
-│   │
-│   ├── estudiante
-│   │   ├── DetallePedidoScreen.kt
-│   │   ├── InicioScreen.kt
-│   │   ├── LoginScreen.kt
-│   │   ├── MisPedidosScreen.kt
-│   │   ├── NuevoPedidoScreen.kt
-│   │   ├── PerfilScreen.kt
-│   │   ├── ServiciosScreen.kt
-│   │   └── TarifasScreen.kt
-│   │
-│   └── theme
-│       ├── Color.kt
-│       ├── Theme.kt
-│       └── Type.kt
-│
-└── viewmodel
-    ├── AdminServiciosViewModel.kt
-    ├── BandejaViewModel.kt
-    ├── ClientesViewModel.kt
-    ├── DetallePedidoViewModel.kt
-    ├── GestionPedidoViewModel.kt
-    ├── InicioViewModel.kt
-    ├── LavaViewModelFactory.kt
-    ├── MisPedidosViewModel.kt
-    ├── NuevoPedidoViewModel.kt
-    ├── PanelViewModel.kt
-    ├── PerfilViewModel.kt
-    ├── SesionViewModel.kt
-    └── TarifasViewModel.kt
+...
 ```
 
 ---
 
 ## Base de datos
 
-La base de datos local se denomina:
+La base de datos local se denomina `lavacampus.db` y se encuentra en **versión de esquema 2**.
 
-```text
-lavacampus.db
+Para actualizar el esquema desde la versión 1 sin destruir datos existentes, se implementó una migración explícita mediante `Migration(1, 2)` que añade la columna `descuento` a la tabla `pedidos`:
+
+```kotlin
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE pedidos ADD COLUMN descuento REAL NOT NULL DEFAULT 0.0")
+    }
+}
 ```
 
-Está compuesta principalmente por cuatro tablas:
-
-### usuarios
-
-Almacena los estudiantes y administradores que pueden acceder a la aplicación.
-
-### servicios
-
-Contiene los servicios ofrecidos por la lavandería, incluyendo nombre, descripción, unidad, precio, tiempo de entrega y estado activo.
-
-### pedidos
-
-Registra los pedidos realizados por los estudiantes, su estado, fecha de entrega, total, pago y casillero asignado.
-
-### detalles_pedido
-
-Contiene las líneas individuales de cada pedido y relaciona un pedido con los servicios seleccionados.
+Las tablas principales son:
+- `usuarios`: Almacena estudiantes y administradores.
+- `servicios`: Catálogo de servicios con soporte fotográfico.
+- `pedidos`: Registra los pedidos, estado, fecha de entrega, total, **descuento**, pago y casillero.
+- `detalles_pedido`: Líneas individuales de cada pedido con precios históricos congelados.
 
 ---
 
 ## Reglas de negocio
-
-Las principales reglas implementadas son:
 
 1. Un estudiante solo puede visualizar sus propios pedidos.
 2. Un administrador puede visualizar todos los pedidos.
@@ -270,179 +197,94 @@ Las principales reglas implementadas son:
 5. Los servicios por kilogramo admiten cantidades entre 1.0 y 10.0 kg en intervalos de 0.5 kg.
 6. Los servicios por prenda o unidad utilizan cantidades enteras.
 7. Un estudiante puede tener como máximo tres pedidos activos.
-8. El total se obtiene sumando los subtotales de los servicios seleccionados.
+8. **Descuento por volumen**: Si el servicio de lavado (`KG`) supera estrictamente los 5 kg, se aplica un 10% de descuento exclusivamente sobre el subtotal del lavado. El descuento se almacena en el pedido.
 9. El precio utilizado queda almacenado en el detalle del pedido.
 10. La fecha de entrega se calcula utilizando el mayor tiempo de entrega de los servicios seleccionados.
 11. Si la fecha calculada corresponde a domingo, la entrega pasa al lunes.
 12. Un estudiante solamente puede cancelar pedidos en estado `RECIBIDO`.
-13. Los estados avanzan en el siguiente orden:
-
-```text
-RECIBIDO → EN_PROCESO → LISTO → ENTREGADO
-```
-
-14. Un pedido no puede retroceder de estado.
-15. Para pasar un pedido a `LISTO` se debe asignar un casillero disponible.
-16. Los casilleros disponibles van desde `C-01` hasta `C-30`.
-17. Un pedido solo puede pasar a `ENTREGADO` si previamente fue marcado como pagado.
-18. Un servicio utilizado en pedidos anteriores no se elimina; solamente puede ser desactivado.
-19. Si el administrador desactiva la recepción de pedidos, el estudiante no puede registrar uno nuevo.
-20. El perfil seleccionado y el modo oscuro se conservan al cerrar y volver a abrir la aplicación.
+13. Los estados avanzan en orden: `RECIBIDO → EN_PROCESO → LISTO → ENTREGADO` (o `CANCELADO`).
+14. Para pasar a `LISTO` se requiere un casillero (`C-01` a `C-30`).
+15. Para pasar a `ENTREGADO` el pedido debe estar pagado.
+16. **Pedido atrasado**: Un pedido se considera atrasado cuando su `fechaEntrega` es anterior a la fecha actual y permanece en estado `RECIBIDO`, `EN_PROCESO` o `LISTO`. Los pedidos `ENTREGADO` y `CANCELADO` nunca se consideran atrasados.
+17. **Repetir pedido**: Permite tomar un pedido anterior como base, precargando servicios activos con los precios actuales. Requiere confirmación y no crea el pedido automáticamente.
+18. **Cambio de perfil**: Cambiar de perfil regresa al Login para autenticar el perfil seleccionado.
+19. Las preferencias (modo oscuro, avisos, recepción de pedidos) se conservan mediante DataStore.
 
 ---
 
-## Flujo de estados del pedido
+# Rediseño visual final
 
-```text
-                    ┌────────────┐
-                    │  RECIBIDO  │
-                    └─────┬──────┘
-                          │
-                          ▼
-                  ┌───────────────┐
-                  │  EN_PROCESO   │
-                  └───────┬───────┘
-                          │
-                    requiere casillero
-                          │
-                          ▼
-                    ┌──────────┐
-                    │  LISTO   │
-                    └────┬─────┘
-                         │
-                   requiere pago
-                         │
-                         ▼
-                  ┌────────────┐
-                  │ ENTREGADO  │
-                  └────────────┘
-```
-
-Los pedidos permitidos por las reglas correspondientes también pueden terminar en estado `CANCELADO`.
+La interfaz fue rediseñada utilizando **Jetpack Compose y Material 3** bajo la identidad boutique **Crema + Verde Oliva**, incorporando:
+- Tarjetas redondeadas (18-24 dp) y superficies elegantes.
+- Paleta cálida en modo claro y carbón/salvia en modo oscuro.
+- Fotografías locales para servicios, banner e iniciales/avatares de clientes.
+- Barra de navegación inferior flotante.
+- Jerarquía visual avanzada en el panel de administración y flujo de pedidos.
 
 ---
 
 # Capturas de pantalla
 
-## Perfil Estudiante
+## Capturas de la implementación inicial
+- `docs/capturas/estudiante-inicio.png`
+- `docs/capturas/estudiante-nuevo-pedido.png`
+- `docs/capturas/estudiante-perfil.png`
+- `docs/capturas/admin-panel.png`
+- `docs/capturas/admin-gestion-pedido.png`
+- `docs/capturas/admin-clientes.png`
 
-### Inicio
-
-En la pantalla principal el estudiante puede visualizar su pedido activo, realizar seguimiento de su estado y acceder a las principales opciones de la aplicación.
-
-![Inicio del estudiante](docs/capturas/estudiante-inicio.png)
-
-### Nuevo pedido
-
-La aplicación permite seleccionar los servicios y sus cantidades, calculando automáticamente el total y la fecha estimada de entrega.
-
-![Nuevo pedido](docs/capturas/estudiante-nuevo-pedido.png)
-
-### Perfil
-
-El perfil muestra los datos del estudiante, estadísticas de sus pedidos y las preferencias disponibles.
-
-![Perfil del estudiante](docs/capturas/estudiante-perfil.png)
-
----
-
-## Perfil Administrador
-
-### Panel
-
-El administrador dispone de un panel para consultar el estado general de la lavandería mediante indicadores y gráficos.
-
-![Panel del administrador](docs/capturas/admin-panel.png)
-
-### Gestión de pedidos
-
-Desde la gestión de pedidos se controla el avance de estado, la asignación de casilleros y el pago antes de realizar la entrega.
-
-![Gestión de pedido](docs/capturas/admin-gestion-pedido.png)
-
-### Clientes
-
-La pantalla de clientes permite consultar los estudiantes registrados, su cantidad de pedidos y el total gastado, además de realizar búsquedas.
-
-![Clientes del sistema](docs/capturas/admin-clientes.png)
+## Capturas de la versión final
+- `docs/capturas/estudiante-inicio-final.png`
+- `docs/capturas/estudiante-nuevo-pedido-final.png`
+- `docs/capturas/estudiante-perfil-final.png`
+- `docs/capturas/admin-panel-final.png`
+- `docs/capturas/admin-gestion-pedido-final.png`
+- `docs/capturas/admin-clientes-final.png`
 
 ---
 
 # Pruebas de aceptación
 
-Durante las pruebas de funcionamiento se verificaron los principales casos de uso y reglas de negocio de la aplicación.
-
 | Prueba | Resultado |
 |---|---|
 | Login con contraseña incorrecta | Se muestra mensaje de error y no permite ingresar |
 | Nuevo pedido sin seleccionar servicios | El botón Confirmar permanece deshabilitado |
-| 3.5 kg de lavado + 5 prendas de planchado | Total calculado: S/ 40.50 |
+| 5.0 kg de lavado | No aplica descuento |
+| 5.5 kg de lavado | Subtotal S/ 44.00, descuento S/ 4.40, total S/ 39.60 |
 | Intentar crear un cuarto pedido activo | Se muestra el límite de tres pedidos |
 | Cancelar pedido en proceso | No se permite |
 | Pasar a LISTO sin seleccionar casillero | Se rechaza la operación |
-| Seleccionar un casillero ocupado | El casillero aparece ocupado y no puede seleccionarse |
-| Entregar un pedido pendiente de pago | No se permite |
-| Marcar pedido como pagado y entregarlo | La operación se permite |
-| Cambio de estado realizado por administrador | El estudiante recibe el estado actualizado |
-| Eliminar un servicio utilizado | El servicio no se elimina y pasa a inactivo |
-| Servicio inactivo | No aparece al crear un nuevo pedido |
-| Recepción de pedidos desactivada | El estudiante no puede crear nuevos pedidos |
-| Búsqueda de clientes | Filtra los clientes por nombre o código |
-| Cambio de perfil | Navega directamente al otro perfil |
-| Persistencia de perfil | El último perfil seleccionado se conserva |
-| Persistencia de modo oscuro | La configuración se conserva al reiniciar la aplicación |
+| Pedido atrasado | Se identifica visualmente en rojo en la Bandeja |
+| Contador de atrasados | Se muestra en el Panel |
+| Repetir pedido | Precarga cantidades utilizando precios actuales tras confirmación |
+| Salir sin confirmar un pedido repetido | No crea el pedido |
+| Confirmar con tres pedidos activos | Se rechaza por límite de pedidos |
+| Cambio de perfil | Regresa al Login para autenticar el perfil seleccionado |
+| Persistencia de preferencias | La configuración se conserva al reiniciar la aplicación |
 
 ---
 
 # Para pensar
 
 ## ¿Por qué un pedido tiene detalles en otra tabla?
-
-Un pedido puede contener más de un servicio. Por ejemplo, un estudiante puede solicitar lavado y secado junto con planchado en el mismo pedido.
-
-Por eso utilizo `detalles_pedido` para almacenar cada servicio como una línea independiente relacionada con el pedido. Esto evita repetir columnas dentro de `pedidos`, permite representar correctamente una relación de uno a muchos y facilita consultas como el cálculo de ingresos agrupados por servicio.
-
----
+Un pedido puede contener más de un servicio. Usar `detalles_pedido` evita repetir columnas dentro de `pedidos` y facilita consultas agrupadas.
 
 ## ¿Por qué guardar `precioUnitario` y `subtotal` en el detalle?
-
-El precio debe representar lo que el estudiante pagó en el momento en que realizó el pedido.
-
-Si posteriormente cambia el precio de un servicio, un pedido antiguo no debería cambiar su total. Por eso guardo el `precioUnitario` y el `subtotal` dentro de cada detalle.
-
-De esta manera, los pedidos mantienen un registro histórico de sus precios y los cálculos de ingresos no se modifican por cambios posteriores en las tarifas.
-
----
+El precio representa lo que el estudiante pagó en el momento. Al cambiar las tarifas en el futuro, los pedidos antiguos conservan su historial sin alterar los cálculos.
 
 ## ¿Cuándo utilizar `suspend` y cuándo utilizar `Flow`?
-
-Utilizo una función `suspend` cuando necesito realizar una operación puntual que se ejecuta una vez, como insertar un pedido, actualizar un estado o realizar una operación dentro de una transacción.
-
-Utilizo `Flow` cuando necesito observar información que puede cambiar y quiero que la interfaz se actualice cuando Room emita nuevos datos.
-
-En LavaCampus esto permite que, por ejemplo, un cambio realizado por el administrador en el estado de un pedido pueda reflejarse en las pantallas que están observando ese pedido.
-
----
-
-## Persistencia de preferencias
-
-Para las preferencias utilizo DataStore. Esto permite conservar configuraciones como el modo oscuro y el perfil seleccionado incluso después de cerrar completamente la aplicación.
-
-Room se utiliza para los datos estructurados de la lavandería, mientras que DataStore se utiliza para preferencias simples de la aplicación.
+Operaciones puntuales de una sola ejecución utilizan `suspend`; datos reactivos que cambian en el tiempo y actualizan la interfaz utilizan `Flow`.
 
 ---
 
 # Compilación
-
-Para compilar el proyecto desde la terminal se puede ejecutar:
 
 ```powershell
 .\gradlew.bat clean
 .\gradlew.bat assembleDebug
 ```
 
-La compilación final del proyecto fue verificada correctamente con:
-
+Resultado verificado:
 ```text
 BUILD SUCCESSFUL
 ```
@@ -451,8 +293,4 @@ BUILD SUCCESSFUL
 
 ## Conclusión
 
-Con LavaCampus implementé una aplicación Android utilizando una arquitectura MVVM y persistencia local con Room y DataStore.
-
-El desarrollo me permitió trabajar con relaciones entre entidades, consultas mediante DAO, operaciones transaccionales, programación reactiva con Flow y StateFlow, reglas de negocio en ViewModels y una interfaz construida completamente con Jetpack Compose.
-
-También implementé dos perfiles con funcionalidades diferentes, manteniendo una separación entre la interfaz, la lógica de negocio y el acceso a los datos.
+Con LavaCampus implementé una aplicación móvil robusta en Android utilizando MVVM, Room (con migración explícita), DataStore, Jetpack Compose y Material 3, integrando tanto las funcionalidades base como las mejoras avanzadas de la Fase 2 sin alterar la separación de responsabilidades ni las reglas de negocio.

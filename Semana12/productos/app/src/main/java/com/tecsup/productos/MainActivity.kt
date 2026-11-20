@@ -6,6 +6,10 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+<<<<<<< HEAD
+=======
+import androidx.activity.SystemBarStyle
+>>>>>>> origin/mejora-ia
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,7 +42,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+<<<<<<< HEAD
         enableEdgeToEdge()
+=======
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+        )
+>>>>>>> origin/mejora-ia
         val container = AppContainer(applicationContext)
         esperandoPermiso = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             !getPreferences(Context.MODE_PRIVATE).getBoolean(PERMISO_CONSULTADO, false) &&

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.EstadoPedido
+import com.tecsup.lavacampus.util.esAtrasado
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -36,8 +37,10 @@ class BandejaViewModel(
                         EstadoPedido.ENTREGADO.name to 4,
                         EstadoPedido.CANCELADO.name to 5
                     )
+
                     val ordenados = lista.sortedWith(
-                        compareBy<PedidoConDetalle> { prioridad[it.pedido.estado] ?: 99 }
+                        compareByDescending<PedidoConDetalle> { it.pedido.esAtrasado() }
+                            .thenBy { prioridad[it.pedido.estado] ?: 99 }
                             .thenByDescending { it.pedido.fechaCreacion }
                     )
                     _uiState.update {

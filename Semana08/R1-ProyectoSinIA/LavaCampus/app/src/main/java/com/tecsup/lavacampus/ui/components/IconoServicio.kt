@@ -29,7 +29,7 @@ fun IconoServicio(
 
     Box(
         modifier = modifier
-            .size(48.dp)
+            .size(52.dp)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.primaryContainer),
         contentAlignment = Alignment.Center
@@ -37,8 +37,8 @@ fun IconoServicio(
         Icon(
             imageVector = imageVector,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier.size(26.dp)
         )
     }
 }

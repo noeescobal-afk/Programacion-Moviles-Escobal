@@ -1,10 +1,12 @@
 package com.tecsup.lavacampus.ui.admin
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -12,8 +14,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tecsup.lavacampus.R
 import com.tecsup.lavacampus.ui.components.AdminBottomBar
 import com.tecsup.lavacampus.ui.components.AdminTab
 import com.tecsup.lavacampus.ui.components.AppTopBar
@@ -27,6 +32,15 @@ fun obtenerIniciales(nombre: String): String {
     } else {
         nombre.take(2)
     }.uppercase()
+}
+
+fun obtenerDrawableCliente(nombre: String): Int? {
+    return when {
+        nombre.contains("noe", ignoreCase = true) || nombre.contains("ana", ignoreCase = true) -> R.drawable.cliente_noe
+        nombre.contains("luis", ignoreCase = true) -> R.drawable.cliente_luis
+        nombre.contains("marta", ignoreCase = true) -> R.drawable.cliente_marta
+        else -> null
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,8 +77,9 @@ fun ClientesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .statusBarsPadding()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             OutlinedTextField(
                 value = uiState.searchQuery,
@@ -72,7 +87,8 @@ fun ClientesScreen(
                 label = { Text("Buscar por nombre o código") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp)
             )
 
             if (uiState.cargando) {
@@ -82,7 +98,7 @@ fun ClientesScreen(
                         .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             } else if (clientesFiltrados.isEmpty()) {
                 Box(
@@ -98,40 +114,53 @@ fun ClientesScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     items(clientesFiltrados) { cliente ->
+                        val drawableRes = obtenerDrawableCliente(cliente.nombre)
+
                         Card(
                             modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp),
+                                    .padding(18.dp),
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(48.dp)
+                                        .size(56.dp)
                                         .clip(CircleShape)
                                         .background(MaterialTheme.colorScheme.primaryContainer),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(
-                                        text = obtenerIniciales(cliente.nombre),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
+                                    if (drawableRes != null) {
+                                        Image(
+                                            painter = painterResource(id = drawableRes),
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    } else {
+                                        Text(
+                                            text = obtenerIniciales(cliente.nombre),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                 }
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = cliente.nombre,
                                         style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(
                                         text = "Código: ${cliente.codigo}",
@@ -141,11 +170,13 @@ fun ClientesScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
                                             text = "Pedidos: ${cliente.cantidadPedidos}",
-                                            style = MaterialTheme.typography.bodyMedium
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                         Text(
                                             text = "S/ ${String.format(Locale.getDefault(), "%.2f", cliente.totalGastado)}",
