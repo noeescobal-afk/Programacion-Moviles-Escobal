@@ -30,6 +30,9 @@ fun PantallaTareas(vm: TareasViewModel) {
     val primos by vm.primos.collectAsState()
     val carga by vm.carga.collectAsState()
     val simularError by vm.simularError.collectAsState()
+    val intento by vm.intento.collectAsState()
+    val secuenciales by vm.tiemposSecuenciales.collectAsState()
+    val paralelos by vm.tiemposParalelos.collectAsState()
     var toques by remember { mutableIntStateOf(0) }
     var numero by remember { mutableStateOf("500000") }
 
@@ -87,7 +90,7 @@ fun PantallaTareas(vm: TareasViewModel) {
                     CargaUi.Inicial -> Text("Compara ejecución secuencial y paralela")
                     CargaUi.Cargando -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         CircularProgressIndicator(Modifier.size(19.dp), strokeWidth = 2.dp)
-                        Text("Cargando datos simulados...")
+                        Text("Cargando datos simulados... (intento $intento/3)")
                     }
                     is CargaUi.Exito -> Resultado("${estado.modo} · ${estado.perfil}\n${estado.pedidos} pedidos · ${estado.milisegundos} ms")
                     is CargaUi.Error -> Column(Modifier.fillMaxWidth().background(Color(0xFFFCE8E8), RoundedCornerShape(12.dp)).padding(12.dp)) {
@@ -96,6 +99,19 @@ fun PantallaTareas(vm: TareasViewModel) {
                         Button(onClick = vm::cargarALaVez) { Text("Reintentar") }
                     }
                 }
+            }
+            // Mejora 3 + detalle innovador: tablero de eficiencia sobre las mediciones reales.
+            Tarjeta("04  Laboratorio de eficiencia · IA") {
+                Text("Comparación de hasta 5 mediciones por modalidad", style = MaterialTheme.typography.bodySmall)
+                val mediaSec = if (secuenciales.isEmpty()) null else secuenciales.average()
+                val mediaPar = if (paralelos.isEmpty()) null else paralelos.average()
+                Text("Secuencial: " + (mediaSec?.let { "%.0f ms".format(it) } ?: "Sin mediciones"))
+                Text("Paralela: " + (mediaPar?.let { "%.0f ms".format(it) } ?: "Sin mediciones"))
+                if (mediaSec != null && mediaPar != null && mediaSec > 0) {
+                    val ahorro = ((mediaSec - mediaPar) / mediaSec * 100).coerceIn(0.0, 100.0)
+                    LinearProgressIndicator(progress = { (ahorro / 100).toFloat() }, modifier = Modifier.fillMaxWidth())
+                    Resultado("Ahorro estimado de tiempo: ${"%.1f".format(ahorro)} %")
+                } else Text("Ejecuta ambas cargas para comparar el ahorro real.")
             }
             Text("Datos ficticios · Sin conexión a Internet", style = MaterialTheme.typography.labelSmall, color = Color.Gray, modifier = Modifier.align(Alignment.CenterHorizontally))
         }

@@ -61,3 +61,12 @@ Guardar capturas reales del emulador en `evidencias/`: `01_progreso.png`, `02_ca
 ## Base del desarrollo
 
 Implementación estructurada conforme a la guía de clase **GLAB-S14-JLEONS-2026**; el docente autorizó asistencia de IA en ambas fases según comunicación del estudiante. Las diferencias funcionales de la rama de mejoras se documentan en `PROMPTS.md`.
+
+## Fase 2: mejoras implementadas
+
+1. **Progreso desde Repository:** `Flow<Float>` con `flowOn(Dispatchers.Default)`; el ViewModel colecciona eventos.
+2. **Reintento automático:** pedidos reintentados hasta 3 veces con espera de 500 y 1000 ms, respetando cancelación.
+3. **Comparación de tiempos:** registra 5 mediciones por modalidad mientras vive el ViewModel y muestra la media.
+4. **Elemento innovador:** tarjeta «Laboratorio de eficiencia» con porcentaje de tiempo ahorrado, calculado con medidas reales de ambas modalidades.
+
+El historial comparativo es **en memoria de sesión**; no pretende ser DataStore ni persistir tras cerrar la aplicación.
