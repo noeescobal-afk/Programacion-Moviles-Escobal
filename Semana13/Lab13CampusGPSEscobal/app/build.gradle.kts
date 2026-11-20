@@ -1,15 +1,16 @@
 import java.util.Properties
 
-val localProps = Properties().apply {
-    val localFile = rootProject.file("local.properties")
-    if (localFile.exists()) localFile.inputStream().use { load(it) }
-}
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
 }
+
+val localProps = Properties().apply {
+    val localFile = rootProject.file("local.properties")
+    if (localFile.exists()) localFile.inputStream().use { load(it) }
+}
+
 android {
     namespace = "com.tecsup.campusgps"
     compileSdk = 35
@@ -38,5 +39,5 @@ dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
-    implementation("com.google.maps.android:maps-compose:8.4.0")
+    implementation("org.maplibre.gl:android-sdk:11.5.2")
 }

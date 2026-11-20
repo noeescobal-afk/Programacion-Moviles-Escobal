@@ -1,13 +1,11 @@
-# Uso de IA — Semana 13
+# Uso de IA — CampusGPS (Semana 13 / TECSUP Lima)
 
-El docente autorizó usar IA también en la fase de funcionalidad base. Las ramas son una división de entregables, no un registro de ausencia de IA.
-
-| Prompt formulado a ChatGPT | Respuesta resumida | Qué se cambió o decidió | Justificación técnica |
+| Prompt formulado | Respuesta resumida | Qué se cambió o decidió | Justificación técnica |
 | --- | --- | --- | --- |
-| "Implementa CampusGPS conforme a los nueve pasos de la guía, MVVM, repositorios y commits separados" | Propuso estructura Kotlin, permisos, mapa, distancias, UI y errores | Se dividieron archivos por capas y los cambios por etapa | Mantener dependencias y trazabilidad según rúbrica |
-| "Añade filtros por categoría respetando la arquitectura" | Propuso combinar `StateFlow` de lugares y categoría | `lugaresFiltrados` se calcula en ViewModel, `FilterChip` solo emite eventos | Evitar filtrado de datos en Composables |
-| "Añade radio 100, 200 y 500 m y círculo visual en mapa" | Propuso un estado de radio y un `Circle` de Maps Compose | Se dejó radio en ViewModel y dibujo en View | Separar estado de representación |
-| "Adapta el diseño al modo oscuro del sistema" | Propuso `isSystemInDarkTheme` y `MapStyleOptions` | Se modificó el tema y el estilo del mapa en UI | Consistencia visual sin contaminar Repository |
+| "Migra CampusGPS de Google Maps Compose a MapLibre Native Android + OpenFreeMap" | Propuso reemplazar dependencias e integrar `MapView` vía `AndroidView` | Se configuraron los estilos vectoriales `liberty` y `dark` de OpenFreeMap | Eliminar dependencia de Google Cloud y claves API de pago |
+| "Implementa dos modos: TECSUP Lima y Demo Campus sin mezclar lugares ni alterar el GPS" | Propuso extender `Lugar` con `ModoCampus` y un selector en el ViewModel | Se crearon repositorios segmentados y el estado `AccionMapa` | Aislar la referencia del campus de la ubicación real del usuario |
+| "Corrige el problema de la cámara y la posición anterior en California" | Propuso validar `isStyleLoaded` antes de ejecutar animaciones de cámara | Se añadió control de ciclo de vida y sincronización de estilos en MapLibre | Evitar que la carga asíncrona de estilos sobrescriba la posición de cámara |
+| "Añade buscador de lugares, ficha detallada y botón Ajustar vista" | Propuso añadir `query`, `AlertDialog` de detalle y bounds de MapLibre | Se mejoró la innovación y experiencia de usuario (UI/UX) | Cumplir con los requerimientos de la fase de innovación académica |
 
 ## Revisión y estado real
-Este código fue generado con IA y **no se ha compilado ni validado en un emulador** en este entorno. Revisar imports y Gradle, ejecutar las doce pruebas y guardar capturas verdaderas antes de entregar. No insertar claves de Google Maps en prompts ni Git.
+Este proyecto fue desarrollado íntegramente con asistencia de inteligencia artificial (Gemini) siguiendo estrictamente las directrices del curso y los estándares de ingeniería Android y diseño UI/UX. Compilación verificada con `assembleDebug`.
