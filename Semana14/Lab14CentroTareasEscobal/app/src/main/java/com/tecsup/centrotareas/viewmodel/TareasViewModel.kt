@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.collect
 
 class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     private val _mensaje = MutableStateFlow("Listo")
@@ -36,10 +37,9 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             _mensaje.value = "Trabajando..."
             try {
                 Log.d("HILO", "Antes: ${Thread.currentThread().name}")
-                withContext(Dispatchers.Default) {
-                    Log.d("HILO", "Dentro: ${Thread.currentThread().name}")
-                    for (i in 1..100) { delay(40); _progreso.value = i / 100f }
-                }
+                // Mejora 1: la fuente de progreso vive en el Repository.
+                Log.d("HILO", "Dentro: Repository / Dispatchers.Default (flowOn)")
+                repo.progresoTarea().collect { avance -> _progreso.value = avance }
                 Log.d("HILO", "Despues: ${Thread.currentThread().name}")
                 _mensaje.value = "Terminó"
             } catch (e: CancellationException) {
@@ -69,6 +69,14 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     }
     fun cancelarPrimos() { if (_primos.value == PrimosUi.Calculando) { _primos.value = PrimosUi.Cancelado; trabajoPrimos?.cancel() } }
 
+    // Mejora 3: historial comparativo en memoria de la sesión (hasta 5 por modo).
+    private val _tiemposSecuenciales = MutableStateFlow<List<Long>>(emptyList())
+    val tiemposSecuenciales = _tiemposSecuenciales.asStateFlow()
+    private val _tiemposParalelos = MutableStateFlow<List<Long>>(emptyList())
+    val tiemposParalelos = _tiemposParalelos.asStateFlow()
+    private val _intento = MutableStateFlow(0)
+    val intento = _intento.asStateFlow()
+
     private val _carga = MutableStateFlow<CargaUi>(CargaUi.Inicial)
     val carga = _carga.asStateFlow()
     private val _simularError = MutableStateFlow(false)
@@ -82,18 +90,37 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             _carga.value = CargaUi.Cargando
             val inicio = System.currentTimeMillis()
             try {
+                _intento.value = 0
                 val (perfil, pedidos) = if (paralelo) {
                     coroutineScope {
                         val a = async { repo.cargarPerfil() }
-                        val b = async { repo.cargarPedidos(_simularError.value) }
+                        val b = async { pedidosConReintento(_simularError.value) }
                         Pair(a.await(), b.await())
                     }
                 } else {
-                    Pair(repo.cargarPerfil(), repo.cargarPedidos(_simularError.value))
+                    Pair(repo.cargarPerfil(), pedidosConReintento(_simularError.value))
                 }
-                _carga.value = CargaUi.Exito(if (paralelo) "A la vez" else "Una por una", perfil, pedidos.size, System.currentTimeMillis() - inicio)
+                val ms = System.currentTimeMillis() - inicio
+                if (paralelo) _tiemposParalelos.value = (_tiemposParalelos.value + ms).takeLast(5)
+                else _tiemposSecuenciales.value = (_tiemposSecuenciales.value + ms).takeLast(5)
+                _carga.value = CargaUi.Exito(if (paralelo) "A la vez" else "Una por una", perfil, pedidos.size, ms)
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) { _carga.value = CargaUi.Error("No se pudo cargar: ${e.message ?: "Error desconocido"}") }
         }
+    }
+
+    // Mejora 2: reintento automático hasta 3 intentos, 500 ms y 1000 ms de espera.
+    // La cancelación siempre se propaga; jamás se trata como error de red.
+    private suspend fun pedidosConReintento(error: Boolean): List<String> {
+        repeat(3) { indice ->
+            _intento.value = indice + 1
+            try { return repo.cargarPedidos(error) }
+            catch (e: CancellationException) { throw e }
+            catch (e: Exception) {
+                if (indice == 2) throw e
+                delay(500L * (indice + 1))
+            }
+        }
+        error("Reintentos agotados")
     }
 }
