@@ -6,8 +6,17 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 class TareasRepositoryLocal : TareasRepository {
+    // Mejora 1: el Repository emite progreso real con Flow desde Default.
+    override fun progresoTarea(): Flow<Float> = flow {
+        emit(0f)
+        for (i in 1..100) { delay(40); emit(i / 100f) }
+    }.flowOn(Dispatchers.Default)
+
     override suspend fun cargarPerfil(): String { delay(2000); return "Ana Torres (ficticia)" }
     override suspend fun cargarPedidos(simularError: Boolean): List<String> {
         delay(3000)
