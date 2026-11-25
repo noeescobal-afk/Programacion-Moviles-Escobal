@@ -23,8 +23,9 @@ import androidx.compose.ui.unit.dp
 import com.tecsup.murocampus.model.Post
 
 @Composable
-fun TarjetaPost(post: Post, modifier: Modifier = Modifier) {
+fun TarjetaPost(post: Post, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),

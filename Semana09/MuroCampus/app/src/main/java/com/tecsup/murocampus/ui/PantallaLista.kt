@@ -10,6 +10,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun PantallaLista(
     viewModel: PostsViewModel,
+    onPostClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val estado by viewModel.lista.collectAsStateWithLifecycle()
@@ -28,7 +29,7 @@ fun PantallaLista(
         is UiState.Exito -> {
             LazyColumn(modifier = modifier) {
                 items(state.datos) { post ->
-                    TarjetaPost(post = post)
+                    TarjetaPost(post = post, onClick = { onPostClick(post.id) })
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.tecsup.murocampus
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,11 +12,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.murocampus.data.PostRepositoryRemote
 import com.tecsup.murocampus.data.remote.RetrofitClient
+import com.tecsup.murocampus.ui.PantallaDetalle
 import com.tecsup.murocampus.ui.PantallaLista
 import com.tecsup.murocampus.ui.PostsViewModel
 import com.tecsup.murocampus.ui.PostsViewModelFactory
@@ -30,6 +36,18 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MuroCampusTheme {
+                val viewModel: PostsViewModel = viewModel(
+                    factory = PostsViewModelFactory(
+                        PostRepositoryRemote(RetrofitClient.api)
+                    )
+                )
+
+                var idSeleccionado by rememberSaveable { mutableStateOf<Int?>(null) }
+
+                BackHandler(enabled = idSeleccionado != null) {
+                    idSeleccionado = null
+                }
+
                 Scaffold(
                     topBar = {
                         TopAppBar(
@@ -41,17 +59,25 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) { innerPadding ->
-                    val viewModel: PostsViewModel = viewModel(
-                        factory = PostsViewModelFactory(
-                            PostRepositoryRemote(RetrofitClient.api)
+                    val modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+
+                    if (idSeleccionado == null) {
+                        PantallaLista(
+                            viewModel = viewModel,
+                            onPostClick = { postId ->
+                                idSeleccionado = postId
+                                viewModel.abrir(postId)
+                            },
+                            modifier = modifier
                         )
-                    )
-                    PantallaLista(
-                        viewModel = viewModel,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                    )
+                    } else {
+                        PantallaDetalle(
+                            viewModel = viewModel,
+                            modifier = modifier
+                        )
+                    }
                 }
             }
         }
