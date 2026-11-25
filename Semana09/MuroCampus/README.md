@@ -100,3 +100,34 @@ Las pruebas se realizaron en un emulador Pixel 7 con Android 15 (API 35).
 
 - Guía GLAB-S09 de Programación en Móviles.
 - Presentaciones previas del curso de Programación en Móviles.
+
+## Historial de commits de MuroCampus
+
+### Fase 1 · `main`
+
+| Commit | Cambio |
+|---|---|
+| `d95ce66` | Importación del proyecto base. |
+| `71fc894` | Permiso de Internet y dependencias de Retrofit. |
+| `fb67e9d` | Modelos `Post`, `Comentario` y `NuevoPost`. |
+| `0dbcea0` | Interfaz `PostApi` con GET y POST. |
+| `f3c8eca` | Cliente Retrofit con OkHttp y conversor JSON. |
+| `a8f5f90` | Repositorio con manejo de resultados mediante `Result`. |
+| `5ada963` | Lista de publicaciones con estados de carga, éxito y error. |
+| `5e41315` | Detalle de la publicación y comentarios con `@Path`. |
+| `763541f` | Filtro por usuario con `@Query` y creación con `POST` y `@Body`. |
+| `83f8abe` | Dependencias de ViewModel Compose e iconos. |
+| `8cead5d` | README con estructura y capturas. |
+
+[Ver historial de MuroCampus en main](https://github.com/noeescobal-afk/Programacion-Moviles-Escobal/commits/main/Semana09/MuroCampus/)
+
+### Fase 2 · `mejora-ia-semana09`
+
+| Commit | Cambio |
+|---|---|
+| `305d964` | Búsqueda local por título. |
+| `a843e3e` | Encabezado `Accept: application/json` mediante OkHttp. |
+| `0ccfba7` | Eliminación desde el detalle con `DELETE`. |
+| `acd75e9` | Registro de prompts, decisiones y evidencias. |
+
+[Ver historial de la Fase 2](https://github.com/noeescobal-afk/Programacion-Moviles-Escobal/commits/mejora-ia-semana09/Semana09/MuroCampus/)
