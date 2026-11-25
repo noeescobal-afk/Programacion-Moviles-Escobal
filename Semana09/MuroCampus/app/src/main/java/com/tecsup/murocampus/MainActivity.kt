@@ -82,6 +82,9 @@ class MainActivity : ComponentActivity() {
                     } else if (idSeleccionado != null) {
                         PantallaDetalle(
                             viewModel = viewModel,
+                            onVolver = {
+                                idSeleccionado = null
+                            },
                             modifier = modifier
                         )
                     } else {
