@@ -28,12 +28,16 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _usuarioFiltro = MutableStateFlow<Int?>(null)
     val usuarioFiltro: StateFlow<Int?> = _usuarioFiltro.asStateFlow()
 
+    private val _busqueda = MutableStateFlow("")
+    val busqueda: StateFlow<String> = _busqueda.asStateFlow()
+
     private val _detalle = MutableStateFlow<UiState<DetalleUi>>(UiState.Cargando)
     val detalle: StateFlow<UiState<DetalleUi>> = _detalle.asStateFlow()
 
     private val _publicar = MutableStateFlow<UiState<Post>?>(null)
     val publicar: StateFlow<UiState<Post>?> = _publicar.asStateFlow()
 
+    private var postsOriginales: List<Post> = emptyList()
     private var currentPostId: Int? = null
     private var cargarJob: Job? = null
 
@@ -44,6 +48,19 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     fun filtrar(userId: Int?) {
         _usuarioFiltro.value = userId
         cargar()
+    }
+
+    fun actualizarBusqueda(query: String) {
+        _busqueda.value = query
+        if (_lista.value is UiState.Exito) {
+            val trimmed = query.trim()
+            val filtrados = if (trimmed.isEmpty()) {
+                postsOriginales
+            } else {
+                postsOriginales.filter { it.title.contains(trimmed, ignoreCase = true) }
+            }
+            _lista.value = UiState.Exito(filtrados)
+        }
     }
 
     fun cargar() {
@@ -59,7 +76,14 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
 
             resultado
                 .onSuccess { posts ->
-                    _lista.value = UiState.Exito(posts)
+                    postsOriginales = posts
+                    val query = _busqueda.value.trim()
+                    val filtrados = if (query.isEmpty()) {
+                        postsOriginales
+                    } else {
+                        postsOriginales.filter { it.title.contains(query, ignoreCase = true) }
+                    }
+                    _lista.value = UiState.Exito(filtrados)
                 }
                 .onFailure { error ->
                     _lista.value = UiState.Error(mensajeDe(error))
