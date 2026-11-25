@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.murocampus.data.PostRepositoryRemote
 import com.tecsup.murocampus.data.remote.RetrofitClient
+import com.tecsup.murocampus.ui.PantallaCrear
 import com.tecsup.murocampus.ui.PantallaDetalle
 import com.tecsup.murocampus.ui.PantallaLista
 import com.tecsup.murocampus.ui.PostsViewModel
@@ -43,9 +44,15 @@ class MainActivity : ComponentActivity() {
                 )
 
                 var idSeleccionado by rememberSaveable { mutableStateOf<Int?>(null) }
+                var mostrandoCrear by rememberSaveable { mutableStateOf(false) }
 
-                BackHandler(enabled = idSeleccionado != null) {
-                    idSeleccionado = null
+                BackHandler(enabled = idSeleccionado != null || mostrandoCrear) {
+                    if (mostrandoCrear) {
+                        mostrandoCrear = false
+                        viewModel.limpiarPublicar()
+                    } else if (idSeleccionado != null) {
+                        idSeleccionado = null
+                    }
                 }
 
                 Scaffold(
@@ -63,18 +70,30 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .padding(innerPadding)
 
-                    if (idSeleccionado == null) {
+                    if (mostrandoCrear) {
+                        PantallaCrear(
+                            viewModel = viewModel,
+                            onVolver = {
+                                mostrandoCrear = false
+                                viewModel.limpiarPublicar()
+                            },
+                            modifier = modifier
+                        )
+                    } else if (idSeleccionado != null) {
+                        PantallaDetalle(
+                            viewModel = viewModel,
+                            modifier = modifier
+                        )
+                    } else {
                         PantallaLista(
                             viewModel = viewModel,
                             onPostClick = { postId ->
                                 idSeleccionado = postId
                                 viewModel.abrir(postId)
                             },
-                            modifier = modifier
-                        )
-                    } else {
-                        PantallaDetalle(
-                            viewModel = viewModel,
+                            onCrearClick = {
+                                mostrandoCrear = true
+                            },
                             modifier = modifier
                         )
                     }
