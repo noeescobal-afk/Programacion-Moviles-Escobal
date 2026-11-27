@@ -1,10 +1,12 @@
 package com.tecsup.avisoscampus
 
 import android.app.Application
+import com.tecsup.avisoscampus.notificacion.Notificador
 
 class AvisosApp : Application() {
+
     override fun onCreate() {
         super.onCreate()
-        // TODO Paso 1: crear canal
+        Notificador.crearCanal(this)
     }
 }
