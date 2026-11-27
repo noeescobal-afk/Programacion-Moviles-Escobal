@@ -23,6 +23,9 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
     val mensaje = _mensaje.asStateFlow()
 
     fun permisoRespondido(concedido: Boolean) {
+        if (concedido) {
+            _mensaje.value = null
+        }
         _permiso.value = if (concedido) {
             PermisoUi.Concedido
         } else {
@@ -91,5 +94,7 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
             _eventos.emit(aviso)
         }
     }
-    // TODO Paso 8: manejo de errores
+    fun noSePudoMostrar() {
+        _mensaje.value = "Sin permiso: el aviso se guardó en el historial, pero no se mostró"
+    }
 }

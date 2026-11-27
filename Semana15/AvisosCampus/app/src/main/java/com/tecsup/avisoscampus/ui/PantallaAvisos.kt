@@ -6,6 +6,7 @@ import android.content.IntentFilter
 import androidx.core.content.ContextCompat
 import com.tecsup.avisoscampus.receiver.ModoAvionReceiver
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.tecsup.avisoscampus.model.PermisoUi
@@ -27,6 +28,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
     val contexto = LocalContext.current
     val permiso by vm.permiso.collectAsState()
+    val mensaje by vm.mensaje.collectAsState()
     val avisos by vm.avisos.collectAsState()
     val faltan by vm.faltan.collectAsState()
     val escuchando by vm.escuchandoAvion.collectAsState()
@@ -66,7 +68,11 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
     LaunchedEffect(Unit) {
         vm.eventos.collect { aviso ->
-            Notificador.mostrar(contexto, aviso)
+            val mostrado = Notificador.mostrar(contexto, aviso)
+
+            if (!mostrado) {
+                vm.noSePudoMostrar()
+            }
         }
     }
 
@@ -99,13 +105,49 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 Text("Estado: $estado", color = color)
 
                 Button(onClick = {
-                    if (Build.VERSION.SDK_INT >= 33) {
+                    if (Notificador.tienePermiso(contexto)) {
+                        vm.permisoRespondido(true)
+                    } else if (Build.VERSION.SDK_INT >= 33) {
                         lanzador.launch(Manifest.permission.POST_NOTIFICATIONS)
                     } else {
                         vm.permisoRespondido(true)
                     }
                 }) {
                     Text("Permitir notificaciones")
+                }
+            }
+
+            mensaje?.let { error ->
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(
+                            error,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+
+                        OutlinedButton(onClick = {
+                            val intent = Intent(
+                                Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                            ).apply {
+                                putExtra(
+                                    Settings.EXTRA_APP_PACKAGE,
+                                    contexto.packageName
+                                )
+                            }
+
+                            contexto.startActivity(intent)
+                        }) {
+                            Text("Abrir ajustes")
+                        }
+                    }
                 }
             }
 
