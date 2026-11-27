@@ -1,6 +1,10 @@
 package com.tecsup.avisoscampus.ui
 
 import android.Manifest
+import android.content.Intent
+import android.content.IntentFilter
+import androidx.core.content.ContextCompat
+import com.tecsup.avisoscampus.receiver.ModoAvionReceiver
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,6 +28,28 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val contexto = LocalContext.current
     val permiso by vm.permiso.collectAsState()
     val faltan by vm.faltan.collectAsState()
+    val escuchando by vm.escuchandoAvion.collectAsState()
+
+    DisposableEffect(escuchando, contexto) {
+        if (escuchando) {
+            val receptor = ModoAvionReceiver { activo ->
+                vm.alCambiarModoAvion(activo)
+            }
+
+            ContextCompat.registerReceiver(
+                contexto,
+                receptor,
+                IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED),
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
+
+            onDispose {
+                contexto.unregisterReceiver(receptor)
+            }
+        } else {
+            onDispose { }
+        }
+    }
 
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -118,9 +144,8 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 Row {
                     Text("Escuchar el modo avión", Modifier.weight(1f))
                     Switch(
-                        checked = false,
-                        onCheckedChange = {},
-                        enabled = false
+                        checked = escuchando,
+                        onCheckedChange = { vm.cambiarEscucha(it) }
                     )
                 }
             }
