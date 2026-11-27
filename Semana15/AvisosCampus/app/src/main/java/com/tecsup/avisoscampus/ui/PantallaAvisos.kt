@@ -27,6 +27,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
     val contexto = LocalContext.current
     val permiso by vm.permiso.collectAsState()
+    val avisos by vm.avisos.collectAsState()
     val faltan by vm.faltan.collectAsState()
     val escuchando by vm.escuchandoAvion.collectAsState()
 
@@ -150,9 +151,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }
             }
 
-            Tarjeta("Historial") {
-                Text("Sin avisos todavía")
-            }
+            HistorialAvisos(avisos)
         }
     }
 }
