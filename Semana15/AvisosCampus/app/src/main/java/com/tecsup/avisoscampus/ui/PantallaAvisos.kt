@@ -1,5 +1,10 @@
 package com.tecsup.avisoscampus.ui
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.tecsup.avisoscampus.model.PermisoUi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -17,6 +22,19 @@ import com.tecsup.avisoscampus.notificacion.Notificador
 fun PantallaAvisos(vm: AvisosViewModel) {
 
     val contexto = LocalContext.current
+    val permiso by vm.permiso.collectAsState()
+
+    val lanzador = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        vm.permisoRespondido(concedido)
+    }
+
+    LaunchedEffect(Unit) {
+        if (Notificador.tienePermiso(contexto)) {
+            vm.permisoRespondido(true)
+        }
+    }
 
     LaunchedEffect(Unit) {
         vm.eventos.collect { aviso ->
@@ -44,8 +62,21 @@ fun PantallaAvisos(vm: AvisosViewModel) {
         ) {
 
             Tarjeta("Permiso de notificaciones") {
-                Text("Estado: Sin pedir")
-                Button(onClick = {}, enabled = false) {
+                val (estado, color) = when (permiso) {
+                    PermisoUi.SinPedir -> "Sin pedir" to Color.Gray
+                    PermisoUi.Concedido -> "Permitido" to Color(0xFF2E7D32)
+                    PermisoUi.Denegado -> "Denegado" to Color.Red
+                }
+
+                Text("Estado: $estado", color = color)
+
+                Button(onClick = {
+                    if (Build.VERSION.SDK_INT >= 33) {
+                        lanzador.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        vm.permisoRespondido(true)
+                    }
+                }) {
                     Text("Permitir notificaciones")
                 }
             }

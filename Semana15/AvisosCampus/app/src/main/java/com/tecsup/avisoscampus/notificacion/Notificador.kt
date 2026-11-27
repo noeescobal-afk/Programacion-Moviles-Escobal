@@ -2,6 +2,9 @@ package com.tecsup.avisoscampus.notificacion
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import android.content.Context
 import android.os.Build
 import com.tecsup.avisoscampus.model.Aviso
@@ -27,8 +30,12 @@ object Notificador {
     }
 
     fun tienePermiso(context: Context): Boolean {
-        // TODO Paso 2
-        return false
+        if (Build.VERSION.SDK_INT < 33) return true
+
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     fun mostrar(context: Context, aviso: Aviso): Boolean {
