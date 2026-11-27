@@ -2,6 +2,10 @@ package com.tecsup.avisoscampus.notificacion
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.annotation.SuppressLint
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.tecsup.avisoscampus.R
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
@@ -38,8 +42,21 @@ object Notificador {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    @SuppressLint("MissingPermission")
     fun mostrar(context: Context, aviso: Aviso): Boolean {
-        // TODO Paso 3
-        return false
+        if (!tienePermiso(context)) return false
+
+        val notificacion = NotificationCompat.Builder(context, CANAL)
+            .setSmallIcon(R.drawable.ic_notificacion)
+            .setContentTitle(aviso.titulo)
+            .setContentText(aviso.texto)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+
+        NotificationManagerCompat.from(context)
+            .notify(aviso.id, notificacion)
+
+        return true
     }
 }

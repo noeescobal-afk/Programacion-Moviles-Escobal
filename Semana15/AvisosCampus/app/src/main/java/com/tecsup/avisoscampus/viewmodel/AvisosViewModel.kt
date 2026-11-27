@@ -1,6 +1,8 @@
 package com.tecsup.avisoscampus.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import com.tecsup.avisoscampus.data.AvisosRepository
 import com.tecsup.avisoscampus.model.*
 import kotlinx.coroutines.flow.*
@@ -25,7 +27,16 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
             PermisoUi.Denegado
         }
     }
-    // TODO Paso 3: mostrar aviso
+    fun avisarAhora() {
+        viewModelScope.launch {
+            val aviso = repo.registrar(
+                "Tarea lista",
+                "Tu entrega fue registrada",
+                Origen.BOTON
+            )
+            _eventos.emit(aviso)
+        }
+    }
     // TODO Paso 5: recordatorio
     // TODO Paso 6: receptor de modo avión
     // TODO Paso 8: manejo de errores
